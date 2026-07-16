@@ -1,0 +1,448 @@
+/* =====================================================================
+   ТОКЕНЫ ОФОРМЛЕНИЯ
+   Меняйте цвета здесь — они применятся сразу по всему сайту.
+   ===================================================================== */
+
+
+.container {
+  max-width: 1440px; /* было 1200px — на больших экранах контент выглядел узкой колонкой */
+  margin: 0 auto;
+  padding: 0 40px;
+  width: 100%;
+}
+
+/* =====================================================================
+   ШАПКА
+   ===================================================================== */
+
+
+
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.logoArea {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+}
+
+
+
+.link:hover {
+  background-color: var(--color-navy-soft);
+  color: #ffffff;
+}
+
+/* =====================================================================
+   ОБЩИЙ КАРКАС "СЛАЙДА" — каждый смысловой блок = один полноэкранный слайд
+   ===================================================================== */
+.slide {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 110px 0;
+}
+
+.slide_white {
+  background-color: var(--color-bg-white);
+}
+
+.slide_soft {
+  background-color: var(--color-bg-page);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.slide_inner {
+  width: 100%;
+}
+
+/* Небольшая надпись-эйбрау над заголовком секции, как в шаблонах nicepage */
+.eyebrow {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 14px;
+}
+
+.sectionHead {
+  text-align: center;
+  max-width: 780px;
+  margin: 0 auto 64px auto;
+}
+
+.sectionTitle {
+  font-size: clamp(2rem, 3.6vw, 3rem); /* было до 2.4rem */
+  font-weight: 700;
+  color: var(--color-navy);
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.sectionSubtitle {
+  color: var(--color-text-muted);
+  font-size: 1.15rem;
+  line-height: 1.6;
+}
+
+/* =====================================================================
+   HERO (главный слайд)
+   ===================================================================== */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  background-image: linear-gradient(180deg, rgba(16, 38, 63, 0.82) 0%, rgba(16, 38, 63, 0.9) 100%), url('/test.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.heroContent {
+  max-width: 860px;
+  color: #ffffff;
+}
+
+.heroTagline {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 18px;
+}
+
+.heroTitle {
+  font-size: clamp(2.6rem, 6vw, 4.4rem); /* было до 3.4rem — на широком экране заголовок терялся */
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 26px;
+}
+
+.heroDescription {
+  font-size: 1.2rem;
+  line-height: 1.7;
+  color: #d7e2ee;
+  margin-bottom: 38px;
+  max-width: 620px;
+}
+
+.heroActions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 30px;
+  background: var(--color-accent);
+  color: #ffffff;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.98rem;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.btnPrimary:hover {
+  background: #2578bd;
+}
+
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 30px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #ffffff;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.98rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btnSecondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #ffffff;
+}
+
+/* =====================================================================
+   ОБЩИЙ КАРКАС "СЛАЙДА" — каждый смысловой блок = один полноэкранный слайд
+   ===================================================================== */
+.slide {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 110px 0;
+}
+ 
+.slide_white {
+  background-color: var(--color-bg-white);
+}
+ 
+.slide_soft {
+  background-color: var(--color-bg-page);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+ 
+.slide_inner {
+  width: 100%;
+}
+
+/* =====================================================================
+   БЛОК СЛАЙДЕРА (витрина/карусель)
+   ===================================================================== */
+.carouselWrap {
+  background: var(--color-bg-white);
+  border-radius: 18px;
+  padding: 40px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--color-border);
+}
+
+/* =====================================================================
+   О КОМПАНИИ
+   ===================================================================== */
+.aboutGrid {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+}
+
+.aboutText {
+  flex: 1;
+}
+
+.aboutText p {
+  font-size: 1.08rem;
+  line-height: 1.8;
+  color: var(--color-text-muted);
+}
+
+.aboutImageWrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.aboutImg {
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+  object-fit: cover;
+}
+
+.statsRow {
+  display: flex;
+  gap: 40px;
+  margin-top: 36px;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.statNumber {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.statLabel {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+/* =====================================================================
+   ВИТРИНА ТОВАРОВ (содержимое карточек — без изменений)
+   ===================================================================== */
+.cards_grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 28px;
+}
+
+.card_item {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card_item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-soft);
+  border-color: var(--color-accent);
+}
+
+.card_top_info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.card_image {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+}
+
+.card_image img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.card_title {
+  font-size: 1.05rem;
+  color: var(--color-navy);
+  margin: 0;
+  font-weight: 600;
+}
+
+.btn_more_full {
+  width: 100%;
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn_more_full:hover {
+  background: var(--color-accent);
+  color: #ffffff;
+}
+
+/* =====================================================================
+   НОВОСТИ
+   ===================================================================== */
+.newsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 30px;
+}
+
+.newsCard {
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+}
+
+.newsImage {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.newsContent {
+  padding: 28px;
+}
+
+.newsDate {
+  font-size: 0.85rem;
+  color: var(--color-accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.newsTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--color-navy);
+}
+
+.newsDesc {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* =====================================================================
+   АДАПТИВНОСТЬ
+   ===================================================================== */
+@media (max-width: 968px) {
+  .aboutGrid {
+    flex-direction: column;
+    text-align: center;
+  }
+  .statsRow {
+    justify-content: center;
+  }
+  .slide {
+    padding: 90px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .headerInner {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .heroActions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .slide,
+  .hero {
+    min-height: auto;
+    padding: 70px 0;
+  }
+}
+
+
+.sliderSlide {
+  height: 90vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: var(--color-bg-white);
+}
+ 
+.sliderSlide > * {
+  width: 100%;
+  height: 100%;
+}
