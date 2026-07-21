@@ -1,0 +1,135 @@
+/* app/contacts/contacts.module.css */
+.pageWrapper {
+  width: 100%;
+}
+
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.section {
+  padding: 80px 0; /* Сохраняем фирменный "воздух" сайта */
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 40px;
+  color: #1a1a1a;
+  text-align: center;
+}
+
+/* Сетка для контактных карточек */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 колонки в ряд */
+  gap: 30px;
+  margin-top: 20px;
+}
+
+/* Стиль отдельной карточки (Адрес, Телефон, Email) */
+.card {
+  background-color: rgba(255, 255, 255, 0.75); /* Полупрозрачный белый фон под цвет body */
+  backdrop-filter: blur(4px); /* Легкое размытие заднего фона */
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(235, 240, 245, 0.8);
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px); /* Легкое всплытие при наведении */
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+}
+
+.cardText {
+  font-size: 1rem;
+  color: #4b5563; /* Серый спокойный цвет для текста */
+  line-height: 1.6;
+}
+
+.link {
+  color: #2f8fdd; /* Фирменный акцентный голубой цвет */
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: #1a3a5c; /* Темнеет при наведении */
+  text-decoration: underline;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 968px) {
+  .grid {
+    grid-template-columns: 1fr; /* Перестраиваем карточки в одну колонку */
+    gap: 20px;
+  }
+  
+  .section {
+    padding: 50px 0;
+  }
+  
+  .title {
+    font-size: 2rem;
+    margin-bottom: 30px;
+  }
+}
+
+
+.mapWrapper {
+  margin-top: 60px; /* Отступ от сетки с карточками */
+  text-align: center;
+}
+
+.mapTitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 24px;
+}
+
+/* Контейнер, задающий размеры и скругления для iframe */
+.mapContainer {
+  width: 100%;
+  height: 450px; /* Высота карты */
+  border-radius: 12px; /* Красивые скругленные углы в стиле сайта */
+  overflow: hidden; /* Скрывает острые углы iframe */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Легкая тень */
+  border: 1px solid rgba(235, 240, 245, 0.8);
+  background-color: rgba(255, 255, 255, 0.5); /* Фон пока карта грузится */
+}
+
+/* Изменение высоты карты для мобильных экранов */
+@media (max-width: 768px) {
+  .mapWrapper {
+    margin-top: 40px;
+  }
+  
+  .mapContainer {
+    height: 300px; /* На смартфонах карту делаем чуть компактнее */
+  }
+}
+
+.Conttext {
+  font-size: 1.3rem;
+  color: #4b5563; /* Серый спокойный цвет для текста */
+  line-height: 1.6;
+  text-align: center
+
+}

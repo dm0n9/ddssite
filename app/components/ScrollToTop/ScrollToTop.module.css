@@ -1,0 +1,52 @@
+.scrollToTop {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #2f8fdd; /* Фирменный акцентный голубой цвет */
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 9999; /* Чтобы кнопка была поверх всех блоков и карт */
+  
+  /* Начальное состояние: кнопка скрыта и сдвинута вниз */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.2s ease, visibility 0.3s;
+}
+
+/* Эффект при наведении */
+.scrollToTop:hover {
+  background-color: #1a3a5c; /* Темнеет при наведении под стиль шапки */
+  transform: translateY(-3px); /* Легкое всплытие */
+}
+
+/* Класс, который активируется при скролле страницы */
+.scrollToTop.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Размер SVG-стрелочки */
+.icon {
+  width: 22px;
+  height: 22px;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .scrollToTop {
+    bottom: 20px;
+    right: 20px;
+    width: 44px; /* Чуть уменьшаем размер на смартфонах */
+    height: 44px;
+  }
+}
