@@ -13,14 +13,9 @@ export const Carousel = () => {
   const [activeIndex, setActiveIndex] = useState(hasMultipleSlides ? 1 : 0);
   const [withTransition, setWithTransition] = useState(true);
 
-  // Ref-флаг вместо ещё одного state — не даёт пользователю "сломать" слайдер,
-  // кликая по стрелкам быстрее, чем идёт анимация (иначе индекс уезжает за
-  // пределы массива клонов и лента дёргается/пустеет).
   const isAnimatingRef = useRef(false);
   const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Клоны первого/последнего слайда по краям — классический приём для
-  // бесконечной карусели без "прыжка" в момент возврата к началу.
   const slides = useMemo(() => {
     if (!hasMultipleSlides) return cardDetails;
     const firstSlide = cardDetails[0];
@@ -48,8 +43,6 @@ export const Carousel = () => {
     autoplayRef.current = setInterval(goToNextSlide, AUTO_PLAY_TIME);
   }, [goToNextSlide, hasMultipleSlides]);
 
-  // Автоплей — перезапускается после ручного клика, чтобы слайд не
-  // "перескакивал" почти сразу после того, как пользователь сам его выбрал.
   useEffect(() => {
     resetAutoplay();
     return () => {
@@ -126,14 +119,12 @@ export const Carousel = () => {
             key={`${card.id}-${index}`}
             style={{
               position: "relative",
-              // flex: "0 0 100%" вместо width: "100%" — гарантирует, что
-              // каждый слайд занимает ровно ширину контейнера и не сжимается,
-              // сколько бы слайдов ни было в массиве.
               flex: "0 0 100%",
               maxWidth: "100%",
               height: "100%",
             }}
           >
+            {/* Картинка слайда */}
             <Image
               src={card.imgUrl}
               alt={card.alt || "slide"}
@@ -142,10 +133,53 @@ export const Carousel = () => {
               style={{ objectFit: "cover" }}
               priority={index === 1}
             />
+
+            {/*  ТЕКСТОВЫЙ ОВЕРЛЕЙ ПОВЕРХ ИЗОБРАЖЕНИЯ  */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                width: "100%", // На всю ширину/длину слайда
+                backgroundColor: "rgba(0, 0, 0, 0.65)", // Полупрозрачный черный фон
+                backdropFilter: "blur(4px)", // Легкий стильный эффект размытия под текстом
+                padding: "24px 32px 60px 32px", // Отступ снизу увеличен (60px), чтобы точки пагинации не перекрывали текст
+                boxSizing: "border-box",
+                color: "#ffffff",
+                zIndex: 1, // Поверх картинки
+              }}
+            >
+              {card.title && (
+                <h3
+                  style={{
+                    margin: "0 0 8px 0",
+                    fontSize: "1.9rem",
+                    fontWeight: 600,
+                    color: "#ffffff",
+                  }}
+                >
+                  {card.title}
+                </h3>
+              )}
+              {card.description && (
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "1.4rem",
+                    lineHeight: 1.5,
+                    color: "rgba(255, 255, 255, 0.85)",
+                    maxWidth: "800px", // Чтобы слишком длинный текст красиво оборачивался
+                  }}
+                >
+                  {card.description}
+                </p>
+              )}
+            </div>
           </div>
         ))}
       </div>
 
+      {/* Кнопки навигации и точки */}
       {hasMultipleSlides && (
         <>
           <button
@@ -166,7 +200,7 @@ export const Carousel = () => {
               cursor: "pointer",
               fontSize: "28px",
               lineHeight: "48px",
-              zIndex: 2,
+              zIndex: 3, // Подняли zIndex, чтобы кнопки навигации были выше текстового блока
             }}
           >
             &lsaquo;
@@ -190,7 +224,7 @@ export const Carousel = () => {
               cursor: "pointer",
               fontSize: "28px",
               lineHeight: "48px",
-              zIndex: 2,
+              zIndex: 3,
             }}
           >
             &rsaquo;
@@ -201,11 +235,11 @@ export const Carousel = () => {
             style={{
               position: "absolute",
               left: "50%",
-              bottom: "28px",
+              bottom: "16px",
               display: "flex",
               gap: "10px",
               transform: "translateX(-50%)",
-              zIndex: 2,
+              zIndex: 3, // Точки пагинации поверх текстового оверлея
             }}
           >
             {cardDetails.map((card, index) => (

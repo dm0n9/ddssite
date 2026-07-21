@@ -91,9 +91,9 @@ export default function Home() {
 
               <div className={styles.aboutImageWrapper}>
                 <Image
-                  src="/test.jpg"
-                  width={480}
-                  height={340}
+                  src="/photo_2026-07-21_14-00-35.jpg"
+                  width={580}
+                  height={440}
                   alt="О компании DDS"
                   className={styles.aboutImg}
                 />
@@ -124,7 +124,7 @@ export default function Home() {
                     </div>
                     <h3 className={styles.card_title}>Газоанализатор</h3>
                   </div>
-                  <Link href="#more" className={styles.btn_more_full}>Подробнее</Link>
+                  <Link href="http://localhost:3000/minewatch?product=sga" className={styles.btn_more_full}>Подробнее</Link>
                 </div>
 
                 <div className={styles.card_item}>
@@ -134,7 +134,7 @@ export default function Home() {
                     </div>
                     <h3 className={styles.card_title}>Планшет</h3>
                   </div>
-                  <Link href="#more" className={styles.btn_more_full}>Подробнее</Link>
+                  <Link href="http://localhost:3000/minewatch?product=tablet" className={styles.btn_more_full}>Подробнее</Link>
                 </div>
 
                 <div className={styles.card_item}>
@@ -144,27 +144,27 @@ export default function Home() {
                     </div>
                     <h3 className={styles.card_title}>Расходометр</h3>
                   </div>
-                  <Link href="#more" className={styles.btn_more_full}>Подробнее</Link>
+                  <Link href="http://localhost:3000/minewatch?product=flowmeter" className={styles.btn_more_full}>Подробнее</Link>
                 </div>
 
                 <div className={styles.card_item}>
                   <div className={styles.card_top_info}>
                     <div className={styles.card_image}>
-                      <img src="https://placehold.co/300x200/0d233a/ffffff?text=Изображение+4" alt="Товар 4" />
+                      <img src="/products/shep_01.png" alt="Товар 4" />
                     </div>
-                    <h3 className={styles.card_title}>Товар 4</h3>
+                    <h3 className={styles.card_title}>ШЭП-01</h3>
                   </div>
-                  <Link href="#more" className={styles.btn_more_full}>Подробнее</Link>
+                  <Link href="http://localhost:3000/minewatch?product=shep-01" className={styles.btn_more_full}>Подробнее</Link>
                 </div>
 
                 <div className={styles.card_item}>
                   <div className={styles.card_top_info}>
                     <div className={styles.card_image}>
-                      <img src="https://placehold.co/300x200/0d233a/ffffff?text=Изображение+5" alt="Товар 5" />
+                      <img src="/products/wipan_1.jpg" alt="Товар 5" />
                     </div>
-                    <h3 className={styles.card_title}>Товар 5</h3>
+                    <h3 className={styles.card_title}>WiPAN</h3>
                   </div>
-                  <Link href="#more" className={styles.btn_more_full}>Подробнее</Link>
+                  <Link href="http://localhost:3000/minewatch?product=wipan" className={styles.btn_more_full}>Подробнее</Link>
                 </div>
 
               </div>
