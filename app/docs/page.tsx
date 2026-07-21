@@ -2,9 +2,11 @@
 import { useState } from "react";
 import styles from "./docs.module.css";
 import { docsTexts } from "./lang"; 
+import { useLanguage } from "../context/LanguageContext";
 
 export default function DocumentationPage() {
-  const [currentLang, setCurrentLang] = useState<"ru" | "en" | "cn">("ru");
+  // Достаем глобальный язык из контекста
+  const { currentLang } = useLanguage();
   const [activeCategory, setActiveCategory] = useState<"all" | "certificate" | "manual" | "catalog">("all");
 
   const uiTexts = {
@@ -12,10 +14,7 @@ export default function DocumentationPage() {
     tab_all: { ru: "Все документы", en: "All Docs", cn: "所有文档" },
     tab_certs: { ru: "Сертификаты ТР ТС", en: "Certificates", cn: "认证证书" },
     tab_manuals: { ru: "Руководства и паспорта", en: "Manuals & Passports", cn: "操作手册" },
-    tab_catalogs: { ru: "Каталоги", en: "Catalogs", cn: "产品目录" },
-    menu_products: { ru: "Продукция", en: "Products", cn: "产品中心" },
-    menu_docs: { ru: "Документация", en: "Documentation", cn: "技术文档" },
-    menu_contacts: { ru: "Контакты", en: "Contacts", cn: "联系我们" }
+    tab_catalogs: { ru: "Каталоги", en: "Catalogs", cn: "产品目录" }
   };
 
   const filteredDocs = docsTexts.documents.filter((doc) => {
@@ -25,33 +24,6 @@ export default function DocumentationPage() {
 
   return (
     <main className={styles.main_layout}>
-      {/* Фирменная синяя шапка ДДС */}
-      <header className={styles.header}>
-        <div className={`${styles.container} ${styles.header_flex}`}>
-          <div className={styles.logo_block}>
-            <span className={styles.logo_main}>ДДС</span>
-            <span className={styles.logo_sub}>Сибирь</span>
-          </div>
-          <nav className={styles.nav_menu}>
-            {/* Ссылки навигации теперь ведут на главные разделы корня app */}
-            <a href="/minewatch" className={styles.nav_link}>{uiTexts.menu_products[currentLang]}</a>
-            <a href="/docs" className={`${styles.nav_link} ${styles.nav_link_active}`}>{uiTexts.menu_docs[currentLang]}</a>
-            <a href="#" className={styles.nav_link}>{uiTexts.menu_contacts[currentLang]}</a>
-          </nav>
-          <div className={styles.lang_switcher}>
-            {(["ru", "en", "cn"] as const).map((lang) => (
-              <button 
-                key={lang}
-                className={`${styles.header_btn} ${currentLang === lang ? styles.header_btn_active : ""}`} 
-                onClick={() => setCurrentLang(lang)}
-              >
-                {lang.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        </div>
-      </header>
-
       {/* Основной контент */}
       <section className={styles.container} style={{ paddingTop: "40px", paddingBottom: "60px" }}>
         <h1 className={styles.main_title} style={{ margin: "0 0 30px 0" }}>

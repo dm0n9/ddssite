@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import cardDetails from "./carouselConfig";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 const AUTO_PLAY_TIME = 5000;
 const TRANSITION_MS = 1000;
 
 export const Carousel = () => {
   const hasMultipleSlides = cardDetails.length > 1;
+  const { currentLang } = useLanguage();
 
   const [activeIndex, setActiveIndex] = useState(hasMultipleSlides ? 1 : 0);
   const [withTransition, setWithTransition] = useState(true);
@@ -127,7 +129,8 @@ export const Carousel = () => {
             {/* Картинка слайда */}
             <Image
               src={card.imgUrl}
-              alt={card.alt || "slide"}
+              // ДОБАВЛЕНО [currentLang]
+              alt={card.alt[currentLang] || "slide"}
               fill
               sizes="100vw"
               style={{ objectFit: "cover" }}
@@ -140,13 +143,13 @@ export const Carousel = () => {
                 position: "absolute",
                 bottom: 0,
                 left: 0,
-                width: "100%", // На всю ширину/длину слайда
-                backgroundColor: "rgba(0, 0, 0, 0.65)", // Полупрозрачный черный фон
-                backdropFilter: "blur(4px)", // Легкий стильный эффект размытия под текстом
-                padding: "24px 32px 60px 32px", // Отступ снизу увеличен (60px), чтобы точки пагинации не перекрывали текст
+                width: "100%",
+                backgroundColor: "rgba(0, 0, 0, 0.65)",
+                backdropFilter: "blur(4px)",
+                padding: "24px 32px 60px 32px",
                 boxSizing: "border-box",
                 color: "#ffffff",
-                zIndex: 1, // Поверх картинки
+                zIndex: 1,
               }}
             >
               {card.title && (
@@ -158,7 +161,8 @@ export const Carousel = () => {
                     color: "#ffffff",
                   }}
                 >
-                  {card.title}
+                  {/* ДОБАВЛЕНО [currentLang] */}
+                  {card.title[currentLang]}
                 </h3>
               )}
               {card.description && (
@@ -168,10 +172,11 @@ export const Carousel = () => {
                     fontSize: "1.4rem",
                     lineHeight: 1.5,
                     color: "rgba(255, 255, 255, 0.85)",
-                    maxWidth: "800px", // Чтобы слишком длинный текст красиво оборачивался
+                    maxWidth: "800px",
                   }}
                 >
-                  {card.description}
+                  {/* ДОБАВЛЕНО [currentLang] */}
+                  {card.description[currentLang]}
                 </p>
               )}
             </div>
@@ -200,7 +205,7 @@ export const Carousel = () => {
               cursor: "pointer",
               fontSize: "28px",
               lineHeight: "48px",
-              zIndex: 3, // Подняли zIndex, чтобы кнопки навигации были выше текстового блока
+              zIndex: 3,
             }}
           >
             &lsaquo;
@@ -239,7 +244,7 @@ export const Carousel = () => {
               display: "flex",
               gap: "10px",
               transform: "translateX(-50%)",
-              zIndex: 3, // Точки пагинации поверх текстового оверлея
+              zIndex: 3,
             }}
           >
             {cardDetails.map((card, index) => (

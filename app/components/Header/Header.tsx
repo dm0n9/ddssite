@@ -14,7 +14,7 @@ const NAV_ITEMS = [
 ] as const;
 
 export default function Header() {
-  const { lang, setLang } = useLanguage();
+  const { currentLang, setCurrentLang } = useLanguage();
   const pathname = usePathname();
 
   return (
@@ -32,7 +32,7 @@ export default function Header() {
               href={item.href}
               className={`${styles.link} ${pathname === item.href ? styles.link_active : ""}`}
             >
-              {menuTexts[item.key][lang]}
+              {menuTexts[item.key][currentLang]}
             </Link>
           ))}
         </nav>
@@ -41,8 +41,8 @@ export default function Header() {
           {(["ru", "en", "cn"] as const).map((l) => (
             <button
               key={l}
-              className={`${styles.header_btn} ${lang === l ? styles.header_btn_active : ""}`}
-              onClick={() => setLang(l)}
+                className={`${styles.header_btn} ${currentLang === l ? styles.header_btn_active : ""}`}
+                onClick={() => setCurrentLang(l)}
             >
               {l.toUpperCase()}
             </button>
