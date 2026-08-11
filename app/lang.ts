@@ -144,7 +144,7 @@ export const homePageTexts = {
     items: [
       {
         id: "news-1",
-        img: "https://placehold.co/600x400/eaf4fd/2f8fdd?text=Новости",
+        img: "https://placehold.co/600x400/eaf4fd/2f8fdd?text=%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D1%82%D0%B8",
         title: {
           ru: "ШАХТНЫЙ ЭЛЕКТРОИЗМЕРИТЕЛЬНЫЙ ПРИБОР ШЭП-01",
           en: "MINE ELECTRICAL MEASURING DEVICE SHEP-01",
@@ -158,7 +158,7 @@ export const homePageTexts = {
       },
       {
         id: "news-2",
-        img: "https://placehold.co/600x400/eaf4fd/2f8fdd?text=Новости",
+        img: "https://placehold.co/600x400/eaf4fd/2f8fdd?text=%D0%9D%D0%BE%D0%B2%D0%BE%D1%81%D1%82%D0%B8",
         title: {
           ru: "ДАТЧИК УРОВНЯ ДУИ",
           en: "LEVEL SENSOR DUI",
