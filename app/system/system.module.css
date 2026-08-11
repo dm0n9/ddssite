@@ -1,0 +1,196 @@
+/* Фоновая подложка страницы */
+.main_layout {
+  background-color: #f4f7f6;
+  color: #1a202c;
+  font-family: system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Заголовок страницы */
+.hero_section {
+  padding-top: 40px;
+  margin-bottom: 30px;
+}
+
+.main_title {
+  font-size: 32px;
+  color: #0d233a;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.main_subtitle {
+  font-size: 16px;
+  color: #4a5568;
+  margin: 0;
+}
+
+/* Список прямоугольных карточек систем */
+.systems_list {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Большой горизонтальный прямоугольник */
+.system_card {
+  background: #ffffff;
+  border: 1px solid #cfd8dc;
+  border-radius: 12px;
+  padding: 32px;
+  display: grid;
+  grid-template-columns: 360px 1fr; /* Картинка слева fixed/гибко, текст справа */
+  gap: 32px;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+/* Эффект наведения */
+.system_card:hover {
+  transform: translateY(-3px);
+  border-color: #0099ff;
+  box-shadow: 0 12px 24px rgba(13, 35, 58, 0.08);
+}
+
+/* Контейнер для картинки слева */
+.image_container {
+  width: 100%;
+  height: 240px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.system_img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.system_card:hover .system_img {
+  transform: scale(1.04);
+}
+
+/* Правый текстовый блок */
+.info_block {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.card_header {
+  margin-bottom: 12px;
+}
+
+.card_badge {
+  display: inline-block;
+  background: #e6f4ff;
+  color: #0077cc;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 4px;
+  border: 1px solid #b3dfff;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.card_title {
+  font-size: 24px;
+  color: #0d233a;
+  margin: 0;
+  font-weight: 700;
+}
+
+.card_desc {
+  color: #4a5568;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 16px 0;
+}
+
+/* Список особенностей/функций системы */
+.features_list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.features_list li {
+  font-size: 14px;
+  color: #2d3748;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bullet {
+  color: #0099ff;
+  font-weight: bold;
+}
+
+/* Широкая кнопка взаимодействия */
+.btn_more {
+  align-self: flex-start;
+  background: #f0f4f8;
+  border: 1px solid #0099ff;
+  color: #0099ff;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn_more:hover {
+  background: #0099ff;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 153, 255, 0.2);
+}
+
+.btn_arrow {
+  transition: transform 0.2s ease;
+}
+
+.btn_more:hover .btn_arrow {
+  transform: translateX(4px);
+}
+
+/* Адаптивность для планшетов и телефонов */
+@media (max-width: 900px) {
+  .system_card {
+    grid-template-columns: 1fr; /* Элементы встают друг под друга */
+    gap: 20px;
+    padding: 24px;
+  }
+
+  .image_container {
+    height: 200px;
+  }
+
+  .btn_more {
+    width: 100%;
+    justify-content: center;
+  }
+}

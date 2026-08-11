@@ -105,7 +105,7 @@
   display: flex;
   align-items: center;
   position: relative;
-  background-image: linear-gradient(180deg, rgba(16, 38, 63, 0.82) 0%, rgba(16, 38, 63, 0.9) 100%), url('/photo_2026-07-21_14-00-35.jpg');
+  background-image: linear-gradient(180deg, rgba(16, 38, 63, 0.82) 0%, rgba(16, 38, 63, 0.9) 100%), url('/pexels-usidz-34150292.jpg');
   background-size: cover;
   background-position: center;
 }
@@ -428,6 +428,16 @@
   .hero {
     min-height: auto;
     padding: 70px 0;
+  }
+
+  .aboutImg {
+    max-width: 100%;    
+    margin-bottom: 20px; 
+  }
+
+  .aboutContent {
+    flex-direction: column; /* Картинка и текст встают друг под друга */
+    text-align: center;     /* (Опционально) Центрирование текста */
   }
 }
 

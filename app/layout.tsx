@@ -3,10 +3,14 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/app/context/LanguageContext";
 import Header from "@/app/components/Header/Header";
+import { CookieBanner } from '@/app/components/CookieBanner/CookieBanner';
 import ScrollToTop from '@/app/components/ScrollToTop/ScrollToTop';
 
 
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  
+  
   return (
     <html lang="ru">
       <body className="min-h-full flex flex-col">
@@ -15,10 +19,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </LanguageProvider>
         <ScrollToTop />
+      <CookieBanner/> 
       </body>
     </html>
   );
 }
+
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

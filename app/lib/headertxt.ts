@@ -3,6 +3,7 @@ export const menuTexts = {
   home: { ru: "На главную", en: "Home", cn: "首页" },
   about: { ru: "О нас", en: "About Us", cn: "关于我们" },
   products: { ru: "Продукция", en: "Products", cn: "产品中心" },
+  system: {ru: "Системы", en: "Systems", cn: "系统"},
   support: { ru: "Сервисная поддержка", en: "Service Support", cn: "售后支持" },
   docs: { ru: "Документация", en: "Documentation", cn: "技术文档" },
   contacts: { ru: "Наши контакты", en: "Contacts", cn: "联系我们" },

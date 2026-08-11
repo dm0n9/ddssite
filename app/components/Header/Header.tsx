@@ -9,6 +9,7 @@ import { menuTexts } from "@/app/lib/headertxt";
 const NAV_ITEMS = [
   { href: "/", key: "home" },
   { href: "/products", key: "products" },
+  { href: "/system", key: "system" },
   { href: "/docs", key: "docs" },
   { href: "/contacts", key: "contacts" },
 ] as const;

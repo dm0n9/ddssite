@@ -1,0 +1,170 @@
+/* Общий макет страницы */
+.main_layout {
+  background-color: #f4f7f6;
+  color: #1a202c;
+  font-family: system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Шапка страницы */
+.hero_section {
+  padding-top: 40px;
+  margin-bottom: 32px;
+}
+
+.back_link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #2f8fdd;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 20px;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.back_link:hover {
+  color: #0d233a;
+  transform: translateX(-4px);
+}
+
+.main_title {
+  font-size: 32px;
+  color: #0d233a;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.update_date {
+  font-size: 14px;
+  color: #718096;
+  margin: 0;
+}
+
+/* Белая карточка с контентом политики */
+.content_card {
+  background: #ffffff;
+  border: 1px solid #cfd8dc;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.intro_text {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #4a5568;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+/* Нумерованные разделы */
+.section {
+  margin-bottom: 32px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.section_title {
+  font-size: 20px;
+  color: #0d233a;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.section_num {
+  color: #2f8fdd;
+  font-weight: 800;
+}
+
+.paragraph {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #2d3748;
+  margin-bottom: 12px;
+}
+
+/* Списки подпунктов */
+.list {
+  list-style: none;
+  padding-left: 0;
+  margin: 12px 0 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.list li {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #4a5568;
+  position: relative;
+  padding-left: 20px;
+}
+
+.list li::before {
+  content: "•";
+  color: #2f8fdd;
+  font-weight: bold;
+  font-size: 18px;
+  position: absolute;
+  left: 4px;
+  top: -2px;
+}
+
+/* Контактная плашка в конце */
+.contacts_box {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #2f8fdd;
+  border-radius: 6px;
+  padding: 20px;
+  margin-top: 24px;
+}
+
+.contacts_box p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #2d3748;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 640px) {
+  .content_card {
+    padding: 24px 18px;
+  }
+
+  .main_title {
+    font-size: 24px;
+  }
+
+  .section_title {
+    font-size: 18px;
+  }
+}
+
+.link {
+  color: #2f8fdd; /* Фирменный голубой акцент */
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease-in-out;
+}
+
+.link:hover {
+  color: #ffffff; /* При наведении подсвечиваем белым */
+  text-decoration: underline;
+}

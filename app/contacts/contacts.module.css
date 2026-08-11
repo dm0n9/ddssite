@@ -133,3 +133,64 @@
   text-align: center
 
 }
+
+.buttonWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 50px; /* Отступ сверху от основного контента */
+  margin-bottom: 20px;
+}
+
+.btnHome {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; /* Расстояние между иконкой и текстом */
+  padding: 14px 28px;
+  background-color: #2f8fdd; /* Фирменный голубой цвет */
+  color: #ffffff;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 8px; /* Аккуратные скругления в стиле карточек */
+  box-shadow: 0 4px 12px rgba(47, 143, 221, 0.25); /* Мягкая голубая тень */
+  transition: all 0.25s ease-in-out;
+  cursor: pointer;
+}
+
+/* Эффект при наведении */
+.btnHome:hover {
+  background-color: #1a3a5c; /* Переход в темно-синий цвет шапки */
+  box-shadow: 0 6px 18px rgba(26, 58, 92, 0.35);
+  transform: translateY(-2px); /* Легкое приподнимание кнопки */
+}
+
+/* Эффект при клике */
+.btnHome:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(26, 58, 92, 0.2);
+}
+
+/* Иконка-стрелка влево */
+.icon {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.25s ease-in-out;
+}
+
+/* При наведении стрелочка аккуратно сдвигается влево */
+.btnHome:hover .icon {
+  transform: translateX(-4px);
+}
+
+/* Адаптив для смартфонов */
+@media (max-width: 768px) {
+  .btnHome {
+    width: 100%; /* На мобилках кнопка растягивается на всю ширину */
+    max-width: 320px;
+    padding: 12px 20px;
+    font-size: 0.95rem;
+  }
+}

@@ -71,7 +71,7 @@ export default function ContactsPage() {
             <h2 className={styles.mapTitle}>{contactsTexts.map_title[currentLang]}</h2>
             <div className={styles.mapContainer}>
               <iframe
-                src="https://widgets.2gis.com/widget?type=firms&options=%7B%22pos%22%3A%7B%22lat%22%3A55.755814%2C%22lon%22%3A37.617635%2C%22zoom%22%3A16%7D%2C%22id%22%3A%2270000001025623916%22%7D"
+                src="https://go.2gis.com/gtHLT"
                 width="100%"
                 height="100%"
                 frameBorder="0"

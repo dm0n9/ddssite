@@ -75,8 +75,8 @@ export default function Home() {
 
             <div className={styles.aboutImageWrapper}>
               <Image
-                src="/photo_2026-07-21_14-00-35.jpg"
-                width={580}
+                src="/team.png"
+                width={700}
                 height={440}
                 alt={homePageTexts.about.alt_image[currentLang]}
                 className={styles.aboutImg}

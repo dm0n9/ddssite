@@ -1,0 +1,80 @@
+.banner {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 40px);
+  max-width: 1200px;
+  background-color: #0d233a; /* Фирменный тёмно-синий */
+  color: #ffffff;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  border: 1px solid #2f8fdd; /* Фирменный голубой акцент */
+  z-index: 9999;
+  animation: slideUp 0.3s ease-in-out;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #e5e7eb;
+}
+
+.button {
+  background-color: #2f8fdd;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.button:hover {
+  background-color: #1a3a5c;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translate(-50%, 100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .button {
+    width: 100%;
+  }
+}
+
+.link {
+  color: #2f8fdd; /* Фирменный голубой акцент */
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease-in-out;
+}
+
+.link:hover {
+  color: #ffffff; /* При наведении подсвечиваем белым */
+  text-decoration: underline;
+}
