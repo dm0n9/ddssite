@@ -9,7 +9,7 @@ CREATE TABLE "Product" (
     "specifications" JSONB NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "additionalImages" TEXT[] DEFAULT ARRAY[]::TEXT[],
-    "ishidden"
+    
 
     CONSTRAINT "Product_pkey" PRIMARY KEY ("id")
 );
