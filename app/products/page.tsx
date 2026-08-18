@@ -30,6 +30,7 @@ export default async function ProductsPage() {
         table: item.specifications,
         // САМАЯ ВАЖНАЯ СТРОЧКА (передает схемы на сайт):
         additionalImages: item.additionalImages || [], 
+        isHidden: (item as any).isHidden,
       };
     });
   } catch (error) {

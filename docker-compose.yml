@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  # БАЗА ДАННЫХ POSTGRESQL
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "0000"
+      POSTGRES_DB: ddssite
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  # ТВОЙ NEXT.JS САЙТ
+  web:
+    build: .
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      # В Докере мы обращаемся по имени контейнера (db), а не localhost!
+      - DATABASE_URL=postgresql://postgres:0000@db:5432/ddssite?schema=public
+      - ADMIN_USER=admin
+      - ADMIN_PASS=admin
+    depends_on:
+      - db
+    volumes:
+      - ./public/products:/app/public/products
+
+volumes:
+  db_data:

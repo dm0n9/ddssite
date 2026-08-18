@@ -1,10 +1,11 @@
 "use client";
 import { useState, useEffect, Suspense, useTransition } from "react"; 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import styles from "./products.module.css";
 import { homeTexts } from "./lang"; 
 import { useLanguage } from "../context/LanguageContext";
-import { addProduct } from "../actions/products"; 
+import { addProduct, updateProduct, toggleProductVisibility } from "../actions/products"; 
+
 
 interface TableRow {
   param: Record<string, string>;
@@ -21,6 +22,7 @@ interface Product {
   table?: TableRow[];
   note?: Record<string, string>;
   additionalImages?: string[];
+  isHidden?: boolean;
 }
 
 function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Product[], isAdmin: boolean }) {
@@ -32,15 +34,27 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
   const [isPending, startTransition] = useTransition();
   const searchParams = useSearchParams();
 
-  // Состояния для динамических полей
   const [appCount, setAppCount] = useState(3);
   const [specCount, setSpecCount] = useState(3);
   const [extraImgCount, setExtraImgCount] = useState(0);
 
-  const inputStyle = { padding: "10px", borderRadius: "6px", border: "1px solid #ccc", color: "#000", width: "100%", boxSizing: "border-box" as const };
-  const labelStyle = { margin: "0 0 8px 0", fontSize: "0.85rem", fontWeight: "bold", color: "#475569" };
-  const boxStyle = { background: "#f8fafc", padding: "12px", borderRadius: "6px", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column" as const, gap: "8px" };
-  const addBtnStyle = { padding: "6px 12px", background: "#e2e8f0", color: "#334155", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "0.85rem", fontWeight: "bold", alignSelf: "flex-start", marginTop: "4px", transition: "0.2s" };
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  const [previewData, setPreviewData] = useState({
+    title: "",
+    desc: "",
+    ex: "",
+    imageUrl: "",
+    apps: [] as string[],
+    specs: [] as { param: string; value: string }[],
+    extraImages: {} as Record<number, string>,
+  });
+
+  const twInput = "w-full border border-gray-300 rounded-md p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white transition-colors placeholder-gray-400";
+  const twLabel = "block text-sm font-semibold text-gray-700 mb-1.5";
+  const twAddBtn = "mt-1 bg-gray-100 text-gray-700 font-medium py-1.5 px-3 border border-gray-300 rounded text-sm hover:bg-gray-200 transition-colors self-start";
+  const twSectionTitle = "text-lg font-bold text-gray-900 mt-6 mb-3 border-b border-gray-100 pb-2";
+  const router = useRouter();
 
   const uiTexts = {
     btn_more: { ru: "Подробнее", en: "Details", cn: "详情" },
@@ -51,10 +65,11 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
     table_title: { ru: "Технические характеристики", en: "Technical Specifications", cn: "技术参数" },
     th_param: { ru: "Наименование параметра", en: "Parameter Name", cn: "参数名称" },
     th_value: { ru: "Значение", en: "Value", cn: "数值" },
-    extra_images: { ru: "Схемы и чертежи", en: "Schemes and Drawings", cn: "图纸和附加材料" },
+    extra_images: { ru: "Схемы и чертежи", en: "Schemes and Drawings", cn: "图纸 и дополнительные материалы" },
   };
 
-  const allProducts = [...homeTexts.products, ...initialDbProducts];
+  const allProducts = [...homeTexts.products, ...initialDbProducts] as Product[];
+  const visibleProducts = allProducts.filter(p => isAdmin ? true : !p.isHidden);
 
   useEffect(() => {
     const productId = searchParams.get("product");
@@ -74,153 +89,407 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
     });
   };
 
+  const handleEdit = (product: Product) => {
+    setEditingProduct(product);
+    setAppCount(Math.max(3, product.specs?.ru?.length || 3));
+    setSpecCount(Math.max(3, product.table?.length || 3));
+    setExtraImgCount(product.additionalImages?.length || 0);
+
+    setPreviewData({
+      title: product.title.ru || "",
+      desc: product.desc.ru || "",
+      ex: product.ex || "",
+      imageUrl: product.image.startsWith('http') || product.image.startsWith('/') ? product.image : `/products/${product.image}`,
+      apps: product.specs?.ru || [],
+      specs: product.table?.map(r => ({ param: r.param.ru, value: r.value.ru })) || [],
+      extraImages: product.additionalImages?.reduce((acc, img, i) => {
+        acc[i] = img.startsWith('http') || img.startsWith('/') ? img : `/products/scheme/${img}`;
+        return acc;
+      }, {} as Record<number, string>) || {}
+    });
+
+    setIsPanelOpen(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleToggleVisibility = (id: string, currentHidden: boolean) => {
+    startTransition(async () => {
+      await toggleProductVisibility(id, !currentHidden);
+      router.refresh(); // Принудительно обновляем данные с сервера
+    });
+  };
+
+  const handlePreviewChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    if (name === "titleRu") setPreviewData((prev) => ({ ...prev, title: value }));
+    if (name === "descRu") setPreviewData((prev) => ({ ...prev, desc: value }));
+    if (name === "ex") setPreviewData((prev) => ({ ...prev, ex: value }));
+  };
+
+  const handleAppChange = (index: number, value: string) => {
+    setPreviewData((prev) => {
+      const newApps = [...prev.apps];
+      newApps[index] = value;
+      return { ...prev, apps: newApps };
+    });
+  };
+
+  const handleSpecChange = (index: number, field: 'param' | 'value', value: string) => {
+    setPreviewData((prev) => {
+      const newSpecs = [...prev.specs];
+      if (!newSpecs[index]) newSpecs[index] = { param: '', value: '' };
+      newSpecs[index][field] = value;
+      return { ...prev, specs: newSpecs };
+    });
+  };
+
+  const handleImagePreview = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      setPreviewData((prev) => ({ ...prev, imageUrl: previewUrl }));
+    }
+  };
+
+  const handleExtraImagePreview = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      setPreviewData((prev) => ({
+        ...prev,
+        extraImages: { ...prev.extraImages, [index]: previewUrl }
+      }));
+    }
+  };
+
   const handleFormSubmit = (formData: FormData) => {
     startTransition(async () => {
-      await addProduct(formData);
+      if (editingProduct) {
+        formData.append("productId", editingProduct.id);
+        await updateProduct(formData);
+      } else {
+        await addProduct(formData);
+      }
       setIsPanelOpen(false);
+      setEditingProduct(null);
       setAppCount(3);
       setSpecCount(3);
-      setExtraImgCount(0); // Сброс
+      setExtraImgCount(0);
+      setPreviewData({ title: "", desc: "", ex: "", imageUrl: "", apps: [], specs: [], extraImages: {} });
     });
   };
 
   return (
     <main className={styles.main_layout}>
-      {/* КНОПКА ВИДНА ТОЛЬКО АДМИНУ */}
       {isAdmin && (
-        <div className={styles.container} style={{ display: "flex", justifyContent: "flex-end", padding: "10px 20px" }}>
+        <div className={styles.container} style={{ display: "flex", justifyContent: "flex-end", padding: "15px 20px" }}>
           <button 
             onClick={() => {
               setIsPanelOpen(!isPanelOpen);
-              if (isPanelOpen) { setAppCount(3); setSpecCount(3); setExtraImgCount(0); }
+              if (!isPanelOpen && !editingProduct) { 
+                setAppCount(3); setSpecCount(3); setExtraImgCount(0); 
+              }
             }}
-            style={{ padding: "8px 16px", background: isPanelOpen ? "#ef4444" : "#ffffff", color: isPanelOpen ? "#fff" : "#0284c7", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "600", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}
+            className="px-6 py-2.5 rounded-md font-bold transition-all shadow-sm text-sm border"
+            style={{ 
+              background: isPanelOpen ? "#fff" : "#0284c7", 
+              color: isPanelOpen ? "#ef4444" : "#fff",
+              borderColor: isPanelOpen ? "#ef4444" : "#0284c7"
+            }}
           >
-            {isPanelOpen ? "✕ Закрыть форму" : "+ Добавить товар"}
+            {isPanelOpen ? "✕ Закрыть панель" : "+ Добавить товар"}
           </button>
         </div>
       )}
       
-      {/* ПАНЕЛЬ ВИДНА ТОЛЬКО АДМИНУ */}
       {isPanelOpen && isAdmin && (
-        <section style={{ padding: "20px", background: "#fff", borderRadius: "12px", maxWidth: "650px", margin: "20px auto", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", maxHeight: "80vh", overflowY: "auto" }}>
-          <h2 style={{ marginBottom: "15px", color: "#000" }}>Добавить товар</h2>
-          <form action={handleFormSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        <div className={styles.container}>
+          <div className="w-full mx-auto mb-12 mt-2">
             
-            <input type="hidden" name="appCount" value={appCount} />
-            <input type="hidden" name="specCount" value={specCount} />
-            <input type="hidden" name="extraImgCount" value={extraImgCount} />
-
-            {/* БАЗОВЫЕ НАСТРОЙКИ */}
-            <div style={{ background: "#f1f5f9", padding: "15px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "12px" }}>
-              <input type="text" name="customFileName" placeholder="Имя файла латиницей (ОБЯЗАТЕЛЬНО, например: mash-10)" required style={inputStyle} />
+            <div className="grid grid-cols-1 xl:grid-cols-[1fr_600px] gap-8 xl:gap-10 items-start">
               
-              <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-                <label style={labelStyle}>Главное фото прибора:</label>
-                <input type="file" name="image" accept="image/*" style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc", background: "#fff", color: "#000" }} />
-              </div>
-              
-              <input type="text" name="ex" placeholder="Маркировка взрывозащиты (например: PO EX IA I MA)" style={inputStyle} />
-            </div>
+              {/* ФОРМА */}
+              <form 
+                key={editingProduct ? editingProduct.id : 'new-product'}
+                action={handleFormSubmit} 
+                className="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col gap-5"
+                style={{ padding: "40px" }}
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {editingProduct ? "Редактирование прибора" : "Создание прибора"}
+                  </h2>
+                  {editingProduct && (
+                    <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">Режим редактирования</span>
+                  )}
+                </div>
+                
+                <input type="hidden" name="appCount" value={appCount} />
+                <input type="hidden" name="specCount" value={specCount} />
+                <input type="hidden" name="extraImgCount" value={extraImgCount} />
 
-            {/* РУССКИЙ ЯЗЫК */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              <h3 style={{ fontSize: "1.1rem", color: "#334155", margin: "10px 0 0 0" }}>🇷🇺 Русский (Основной)</h3>
-              <input type="text" name="titleRu" placeholder="Название товара" required style={inputStyle} />
-              <textarea name="descRu" placeholder="Краткое описание" required style={{...inputStyle, minHeight: "60px"}} />
+                <div>
+                  <label className={twLabel}>Имя файла (латиницей)</label>
+                  <input type="text" name="customFileName" defaultValue={editingProduct ? editingProduct.image.replace(/\.[^/.]+$/, "") : ""} placeholder="ОБЯЗАТЕЛЬНО, например: mash-10" required={!editingProduct} className={twInput} />
+                </div>
+                
+                <div>
+                  <label className={twLabel}>Маркировка взрывозащиты</label>
+                  <input type="text" name="ex" defaultValue={editingProduct?.ex} onChange={handlePreviewChange} placeholder="Например: PO EX IA I MA" className={twInput} />
+                </div>
 
-              <div style={boxStyle}>
-                <p style={labelStyle}>Области применения:</p>
-                {Array.from({ length: appCount }).map((_, i) => (
-                  <input key={`appRu${i}`} type="text" name={`appRu${i + 1}`} placeholder={`Строка ${i + 1}`} style={inputStyle} />
-                ))}
-                <button type="button" onClick={() => setAppCount(c => c + 1)} style={addBtnStyle}>+ Добавить строку</button>
-              </div>
+                <div>
+                  <label className={twLabel}>Главное фото прибора {editingProduct && "(оставьте пустым, чтобы не менять)"}</label>
+                  <input type="file" name="image" accept="image/*" onChange={handleImagePreview} className="w-full border border-gray-300 rounded-md p-1.5 text-sm bg-white file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer" />
+                </div>
 
-              <div style={boxStyle}>
-                <p style={labelStyle}>Характеристики:</p>
-                {Array.from({ length: specCount }).map((_, i) => (
-                  <div key={`specRu${i}`} style={{ display: "flex", gap: "10px" }}>
-                    <input type="text" name={`specRu${i + 1}Param`} placeholder={`Параметр ${i + 1}`} style={inputStyle} />
-                    <input type="text" name={`specRu${i + 1}Value`} placeholder={`Значение ${i + 1}`} style={inputStyle} />
+                {/* РУССКИЙ */}
+                <h3 className={twSectionTitle}>Контент (Русский)</h3>
+                
+                <div>
+                  <label className={twLabel}>Название товара</label>
+                  <input type="text" name="titleRu" defaultValue={editingProduct?.title.ru} onChange={handlePreviewChange} placeholder="Введите название..." required className={twInput} />
+                </div>
+                
+                <div>
+                  <label className={twLabel}>Краткое описание</label>
+                  <textarea name="descRu" defaultValue={editingProduct?.desc.ru} onChange={handlePreviewChange} placeholder="Описание характеристик..." required className={`${twInput} min-h-[80px] resize-none`} />
+                </div>
+
+                <div>
+                  <label className={twLabel}>Области применения</label>
+                  <div className="flex flex-col gap-2.5">
+                    {Array.from({ length: appCount }).map((_, i) => (
+                      <input key={`appRu${i}`} type="text" name={`appRu${i + 1}`} defaultValue={editingProduct?.specs?.ru?.[i]} onChange={(e) => handleAppChange(i, e.target.value)} placeholder={`Строка ${i + 1}`} className={twInput} />
+                    ))}
                   </div>
-                ))}
-                <button type="button" onClick={() => setSpecCount(c => c + 1)} style={addBtnStyle}>+ Добавить параметр</button>
-              </div>
-            </div>
-
-            {/* АНГЛИЙСКИЙ ЯЗЫК */}
-            <details style={{ background: "#f8fafc", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-              <summary style={{ fontWeight: "bold", cursor: "pointer", color: "#0f172a" }}>en Добавить английский перевод</summary>
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "15px" }}>
-                <input type="text" name="titleEn" placeholder="Название товара на английском" style={inputStyle} />
-                <textarea name="descEn" placeholder="Краткое описание на английском" style={{...inputStyle, minHeight: "60px"}} />
-                
-                <div style={boxStyle}>
-                  <p style={labelStyle}>Области применения (на английском):</p>
-                  {Array.from({ length: appCount }).map((_, i) => (
-                    <input key={`appEn${i}`} type="text" name={`appEn${i + 1}`} placeholder={`Строка ${i + 1}`} style={inputStyle} />
-                  ))}
+                  <button type="button" onClick={() => setAppCount(c => c + 1)} className={twAddBtn}>
+                    + Добавить строку
+                  </button>
                 </div>
 
-                <div style={boxStyle}>
-                  <p style={labelStyle}>Характеристики (на английском):</p>
-                  {Array.from({ length: specCount }).map((_, i) => (
-                    <div key={`specEn${i}`} style={{ display: "flex", gap: "10px" }}>
-                      <input type="text" name={`specEn${i + 1}Param`} placeholder={`Параметр ${i + 1}`} style={inputStyle} />
-                      <input type="text" name={`specEn${i + 1}Value`} placeholder={`Значение ${i + 1}`} style={inputStyle} />
+                <div>
+                  <label className={twLabel}>Технические характеристики</label>
+                  <div className="flex flex-col gap-2.5">
+                    {Array.from({ length: specCount }).map((_, i) => (
+                      <div key={`specRu${i}`} className="flex flex-col sm:flex-row gap-2.5">
+                        <input type="text" name={`specRu${i + 1}Param`} defaultValue={editingProduct?.table?.[i]?.param.ru} onChange={(e) => handleSpecChange(i, 'param', e.target.value)} placeholder="Параметр (напр: Напряжение)" className={twInput} />
+                        <input type="text" name={`specRu${i + 1}Value`} defaultValue={editingProduct?.table?.[i]?.value.ru} onChange={(e) => handleSpecChange(i, 'value', e.target.value)} placeholder="Значение (напр: 24В)" className={twInput} />
+                      </div>
+                    ))}
+                  </div>
+                  <button type="button" onClick={() => setSpecCount(c => c + 1)} className={twAddBtn}>
+                    + Добавить параметр
+                  </button>
+                </div>
+
+                {/* АНГЛИЙСКИЙ */}
+                <details className="bg-gray-50 p-4 rounded-md border border-gray-200 mt-2">
+                  <summary className="font-bold cursor-pointer text-gray-800 text-sm">Добавить английский перевод</summary>
+                  <div className="flex flex-col gap-4 mt-4">
+                    <div>
+                      <label className={twLabel}>Название товара (EN)</label>
+                      <input type="text" name="titleEn" defaultValue={editingProduct?.title?.en} placeholder="Введите название на английском..." className={twInput} />
+                    </div>
+                    <div>
+                      <label className={twLabel}>Краткое описание (EN)</label>
+                      <textarea name="descEn" defaultValue={editingProduct?.desc?.en} placeholder="Описание характеристик на английском..." className={`${twInput} min-h-[60px] resize-none`} />
+                    </div>
+                    <div>
+                      <label className={twLabel}>Области применения (EN)</label>
+                      <div className="flex flex-col gap-2.5">
+                        {Array.from({ length: appCount }).map((_, i) => (
+                          <input key={`appEn${i}`} type="text" name={`appEn${i + 1}`} defaultValue={editingProduct?.specs?.en?.[i]} placeholder={`Строка ${i + 1}`} className={twInput} />
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className={twLabel}>Технические характеристики (EN)</label>
+                      <div className="flex flex-col gap-2.5">
+                        {Array.from({ length: specCount }).map((_, i) => (
+                          <div key={`specEn${i}`} className="flex flex-col sm:flex-row gap-2.5">
+                            <input type="text" name={`specEn${i + 1}Param`} defaultValue={editingProduct?.table?.[i]?.param?.en} placeholder="Параметр" className={twInput} />
+                            <input type="text" name={`specEn${i + 1}Value`} defaultValue={editingProduct?.table?.[i]?.value?.en} placeholder="Значение" className={twInput} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </details>
+
+                {/* КИТАЙСКИЙ */}
+                <details className="bg-gray-50 p-4 rounded-md border border-gray-200 mt-2">
+                  <summary className="font-bold cursor-pointer text-gray-800 text-sm">Добавить китайский перевод</summary>
+                  <div className="flex flex-col gap-4 mt-4">
+                    <div>
+                      <label className={twLabel}>Название товара (CN)</label>
+                      <input type="text" name="titleCn" defaultValue={editingProduct?.title?.cn} placeholder="Введите название на китайском..." className={twInput} />
+                    </div>
+                    <div>
+                      <label className={twLabel}>Краткое описание (CN)</label>
+                      <textarea name="descCn" defaultValue={editingProduct?.desc?.cn} placeholder="Описание характеристик на китайском..." className={`${twInput} min-h-[60px] resize-none`} />
+                    </div>
+                    <div>
+                      <label className={twLabel}>Области применения (CN)</label>
+                      <div className="flex flex-col gap-2.5">
+                        {Array.from({ length: appCount }).map((_, i) => (
+                          <input key={`appCn${i}`} type="text" name={`appCn${i + 1}`} defaultValue={editingProduct?.specs?.cn?.[i]} placeholder={`Строка ${i + 1}`} className={twInput} />
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className={twLabel}>Технические характеристики (CN)</label>
+                      <div className="flex flex-col gap-2.5">
+                        {Array.from({ length: specCount }).map((_, i) => (
+                          <div key={`specCn${i}`} className="flex flex-col sm:flex-row gap-2.5">
+                            <input type="text" name={`specCn${i + 1}Param`} defaultValue={editingProduct?.table?.[i]?.param?.cn} placeholder="Параметр" className={twInput} />
+                            <input type="text" name={`specCn${i + 1}Value`} defaultValue={editingProduct?.table?.[i]?.value?.cn} placeholder="Значение" className={twInput} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </details>
+
+                <h3 className={twSectionTitle}>Дополнительные файлы {editingProduct && "(оставьте пустыми для старых файлов)"}</h3>
+                <div className="flex flex-col gap-3">
+                  {Array.from({ length: extraImgCount }).map((_, i) => (
+                    <div key={`extraImg${i}`}>
+                      <label className="block text-[13px] font-medium text-gray-600 mb-1">Схема {i + 1}</label>
+                      <input type="file" name={`extraImg${i + 1}`} accept="image/*" onChange={(e) => handleExtraImagePreview(i, e)} className="w-full border border-gray-300 rounded-md p-1.5 text-sm bg-white file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer" />
                     </div>
                   ))}
-                </div>
-              </div>
-            </details>
-
-            {/* КИТАЙСКИЙ ЯЗЫК */}
-            <details style={{ background: "#f8fafc", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-              <summary style={{ fontWeight: "bold", cursor: "pointer", color: "#0f172a" }}>🇨🇳 Добавить китайский перевод</summary>
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "15px" }}>
-                <input type="text" name="titleCn" placeholder="Название товара на китайском" style={inputStyle} />
-                <textarea name="descCn" placeholder="Краткое описание на китайском" style={{...inputStyle, minHeight: "60px"}} />
-                
-                <div style={boxStyle}>
-                  <p style={labelStyle}>Области применения (на китайском):</p>
-                  {Array.from({ length: appCount }).map((_, i) => (
-                    <input key={`appCn${i}`} type="text" name={`appCn${i + 1}`} placeholder={`Строка ${i + 1}`} style={inputStyle} />
-                  ))}
+                  <button type="button" onClick={() => setExtraImgCount(c => c + 1)} className={twAddBtn}>
+                    + Прикрепить схему/чертеж
+                  </button>
                 </div>
 
-                <div style={boxStyle}>
-                  <p style={labelStyle}>Характеристики (на китайском):</p>
-                  {Array.from({ length: specCount }).map((_, i) => (
-                    <div key={`specCn${i}`} style={{ display: "flex", gap: "10px" }}>
-                      <input type="text" name={`specCn${i + 1}Param`} placeholder={`Параметр ${i + 1}`} style={inputStyle} />
-                      <input type="text" name={`specCn${i + 1}Value`} placeholder={`Значение ${i + 1}`} style={inputStyle} />
+                <div className="flex flex-col gap-2 mt-4">
+                  <button type="submit" disabled={isPending} className="w-full bg-[#22c55e] text-white font-medium py-3.5 px-4 rounded-md hover:bg-green-600 transition-colors shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed text-base">
+                    {isPending ? "Сохранение..." : editingProduct ? "Сохранить изменения" : "Создать товар с таблицей и фото"}
+                  </button>
+                  {editingProduct && (
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        setEditingProduct(null);
+                        setPreviewData({ title: "", desc: "", ex: "", imageUrl: "", apps: [], specs: [], extraImages: {} });
+                      }}
+                      className="w-full bg-gray-100 text-gray-700 font-medium py-3.5 px-4 rounded-md hover:bg-gray-200 transition-colors text-base"
+                    >
+                      Отменить редактирование
+                    </button>
+                  )}
+                </div>
+              </form>
+
+              {/* === ПРАВАЯ ЧАСТЬ ПРЕДПРОСМОТРА === */}
+              <div className="relative">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col sticky top-20 max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full">
+                  
+                  <div 
+                    className="flex justify-between items-center border-b border-gray-100 sticky top-0 bg-white z-10"
+                    style={{ padding: "20px 40px" }}
+                  >
+                    <span className="border border-blue-400 text-blue-600 text-xs font-bold px-3 py-1 rounded">
+                      {previewData.ex || "МАРКИРОВКА EX"}
+                    </span>
+                    <div className="flex gap-2">
+                      <button disabled className="border border-gray-300 text-gray-500 px-3 py-1 rounded text-sm font-medium opacity-60">Поделиться</button>
+                      <button disabled className="border border-gray-300 text-gray-500 px-3 py-1 rounded text-sm font-medium opacity-60">Закрыть</button>
                     </div>
-                  ))}
+                  </div>
+
+                  <div style={{ padding: "40px" }}>
+                    <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 xl:gap-8 mb-8 items-start">
+                      
+                      <div className="w-full aspect-square flex items-center justify-center p-2 bg-white border border-gray-100 shadow-sm rounded-lg">
+                        {previewData.imageUrl ? (
+                           <img src={previewData.imageUrl} className="w-full h-full object-contain" alt="Preview" />
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-lg text-gray-400">
+                            <span className="text-xs font-bold uppercase tracking-wider">Фото</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="min-w-0">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-3 leading-tight break-words hyphens-auto">
+                          {previewData.title || "Шахтный электроизмерительный прибор..."}
+                        </h2>
+                        <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+                          {previewData.desc || "Универсальный контрольно-измерительный прибор. Заполните данные слева."}
+                        </p>
+
+                        {previewData.apps.filter(Boolean).length > 0 && (
+                          <div>
+                            <h4 className="text-sm font-bold text-gray-900 mb-2">Область применения:</h4>
+                            <ul className="list-none pl-0 text-sm text-gray-600 flex flex-col gap-1.5">
+                              {previewData.apps.filter(Boolean).map((app, idx) => (
+                                <li key={idx} className="leading-relaxed flex items-start gap-2">
+                                  <span className="text-blue-500 mt-0.5">•</span>
+                                  <span>{app}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {previewData.specs.some(s => s.param || s.value) && (
+                      <div className="mt-6">
+                        <h4 className="text-base font-bold text-gray-900 mb-3">Технические характеристики</h4>
+                        <div className="rounded-lg overflow-hidden border border-gray-200">
+                          <table className="w-full text-left border-collapse text-sm">
+                            <thead>
+                              <tr className="bg-[#0f172a] text-white">
+                                <th className="py-3 pr-3 font-semibold uppercase tracking-wider text-xs w-1/2" style={{ paddingLeft: '24px' }}>Наименование параметра</th>
+                                <th className="p-3 font-semibold uppercase tracking-wider text-xs w-1/2">Значение</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {previewData.specs.filter(s => s.param || s.value).map((spec, idx) => (
+                                <tr key={idx} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                  <td className="py-3 pr-3 font-semibold text-gray-800 bg-gray-50/50" style={{ paddingLeft: '24px' }}>{spec.param || "—"}</td>
+                                  <td className="p-3 text-gray-600 bg-white">{spec.value || "—"}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                    {Object.keys(previewData.extraImages).length > 0 && (
+                      <div className="mt-10 border-t border-gray-100 pt-8">
+                        <h4 className="text-base font-bold text-gray-900 mb-5">Схемы и чертежи</h4>
+                        <div className="flex flex-col gap-6">
+                          {Object.values(previewData.extraImages).map((imgUrl, idx) => (
+                            <div key={idx} className="text-center">
+                              <img 
+                                src={imgUrl as string} 
+                                alt={`Схема ${idx + 1}`} 
+                                className="w-full rounded-lg border border-gray-200 shadow-sm"
+                              />
+                              <p className="mt-3 text-sm font-semibold text-gray-500">Схема {idx + 1}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                  </div>
+
                 </div>
               </div>
-            </details>
 
-            {/* БЛОК ДОПОЛНИТЕЛЬНЫХ ФОТО (СХЕМЫ) */}
-            <div style={boxStyle}>
-              <h3 style={{ fontSize: "1.05rem", color: "#334155", margin: "0 0 10px 0" }}>📎 Дополнительные фото (Схемы, чертежи)</h3>
-              {Array.from({ length: extraImgCount }).map((_, i) => (
-                <div key={`extraImg${i}`} style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-                  <label style={labelStyle}>Фото/Схема {i + 1}:</label>
-                  <input type="file" name={`extraImg${i + 1}`} accept="image/*" style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc", background: "#fff", color: "#000" }} />
-                </div>
-              ))}
-              <button type="button" onClick={() => setExtraImgCount(c => c + 1)} style={addBtnStyle}>+ Прикрепить фото/схему</button>
             </div>
-
-            <button type="submit" disabled={isPending} style={{ padding: "14px", background: isPending ? "#999" : "#22c55e", color: "#fff", border: "none", borderRadius: "8px", cursor: isPending ? "not-allowed" : "pointer", fontWeight: "bold", fontSize: "1.05rem", marginTop: "10px" }}>
-              {isPending ? "Сохраняем в базу..." : "Создать товар"}
-            </button>
-          </form>
-        </section>
+          </div>
+        </div>
       )}
 
-      {/* Заголовок */}
+      {/* Заголовок сайта */}
       <section className={styles.hero_section}>
         <div className={styles.container}>
           <h1 className={styles.main_title}>{homeTexts["home_page"]?.[currentLang] || "Продукция"}</h1>
@@ -230,37 +499,84 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
       {/* Каталог */}
       <section className={styles.catalog_section}>
         <div className={`${styles.container} ${styles.product_grid}`}>
-          {allProducts.map((product) => (
-            <div key={product.id} className={styles.product_card}>
-              <div className={styles.card_top_info}>
-                <div className={styles.card_badge_row}>
-                  {product.ex && product.ex !== "Нет данных" && (
-                    <span className={styles.ex_badge}>{product.ex}</span>
+          {/* 1. АКТИВНЫЕ ТОВАРЫ */}
+          {allProducts
+            .filter(p => !p.isHidden)
+            .map((product) => {
+              const p = product as Product;
+              const isDbProduct = initialDbProducts.some(dbP => dbP.id === p.id);
+
+              return (
+                <div key={p.id} className={`${styles.product_card} relative`}>
+                  {/* Панель управления */}
+                  {isAdmin && isDbProduct && (
+                    <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
+                      <button onClick={(e) => { e.stopPropagation(); handleEdit(p); }} className="bg-white/95 backdrop-blur-sm border border-blue-200 text-blue-600 px-3 py-1.5 rounded-md text-[11px] font-black uppercase tracking-wider hover:bg-blue-50 shadow-md">✏️ Изменить</button>
+                      <button 
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          console.log("Клик по скрытию товара с ID:", p.id); // Проверьте консоль браузера (F12 -> Console)
+                          handleToggleVisibility(p.id, !!p.isHidden); 
+                        }} 
+                        className="..."
+                      >
+                        🚫 Скрыть
+                      </button> 
+                    </div>
                   )}
+                  <div className={styles.card_top_info}>
+                    <div className={styles.card_badge_row}>{p.ex && p.ex !== "Нет данных" && <span className={styles.ex_badge}>{p.ex}</span>}</div>
+                    <div className={styles.card_image_container}>
+                      <img src={p.image.startsWith('http') || p.image.startsWith('/') ? p.image : `/products/${p.image}`} alt={p.title[currentLang] || p.title.ru} className={styles.product_img} />
+                    </div>
+                    <div className={styles.card_info}>
+                      <h3 className={styles.card_title}>{p.title[currentLang] || p.title.ru}</h3>
+                      <p className={styles.card_desc}>{p.desc[currentLang] || p.desc.ru}</p>
+                    </div>
+                  </div>
+                  <button className={styles.btn_more_full} onClick={() => setSelectedProduct(p)}>
+                    <span>{uiTexts.btn_more[currentLang]}</span>
+                    <span className={styles.btn_arrow}>→</span>
+                  </button>
                 </div>
-                <div className={styles.card_image_container}>
-                  <img 
-                    src={product.image.startsWith('http') || product.image.startsWith('/') ? product.image : `/products/${product.image}`} 
-                    alt={product.title[currentLang] || product.title.ru} 
-                    className={styles.product_img} 
-                  />
-                </div>
-                <div className={styles.card_info}>
-                  <h3 className={styles.card_title}>{product.title[currentLang] || product.title.ru}</h3>
-                  <p className={styles.card_desc}>{product.desc[currentLang] || product.desc.ru}</p>
-                </div>
-              </div>
-              
-              <button className={styles.btn_more_full} onClick={() => setSelectedProduct(product as Product)}>
-                <span>{uiTexts.btn_more[currentLang]}</span>
-                <span className={styles.btn_arrow}>→</span>
-              </button>
-            </div>
-          ))}
+              );
+          })}
         </div>
+
+        {/* 2. СКРЫТЫЕ ТОВАРЫ (Только для админа) */}
+        {isAdmin && allProducts.some(p => p.isHidden) && (
+          <div className={`${styles.container} mt-20 pt-10 border-t-2 border-dashed border-gray-300`}>
+            <h2 className="text-xl font-black text-gray-400 uppercase tracking-widest mb-8">Скрытые товары</h2>
+            <div className={styles.product_grid}>
+              {allProducts
+                .filter(p => p.isHidden)
+                .map((product) => {
+                  const p = product as Product;
+                  return (
+                    <div key={p.id} className={`${styles.product_card} relative opacity-60 bg-gray-50`}>
+                      <div className="absolute top-3 right-3 z-20">
+                        <button onClick={() => handleToggleVisibility(p.id, !!p.isHidden)} className="bg-white border border-emerald-200 text-emerald-700 px-3 py-1.5 rounded-md text-[11px] font-black uppercase tracking-wider hover:bg-emerald-50 shadow-md">
+                          👁️ Показать
+                        </button>
+                      </div>
+                      <div className={styles.card_top_info}>
+                        <div className={styles.card_badge_row}>{p.ex && <span className={styles.ex_badge}>{p.ex}</span>}</div>
+                        <div className={styles.card_image_container}>
+                          <img src={p.image.startsWith('http') || p.image.startsWith('/') ? p.image : `/products/${p.image}`} alt={p.title[currentLang]} className={styles.product_img} />
+                        </div>
+                        <div className={styles.card_info}>
+                          <h3 className={styles.card_title}>{p.title[currentLang] || p.title.ru} <span className="text-red-400 text-xs">(Скрыт)</span></h3>
+                        </div>
+                      </div>
+                    </div>
+                  );
+              })}
+            </div>
+          </div>
+        )}
       </section>
 
-      {/* МОДАЛЬНОЕ ОКНО */}
+      {/* МОДАЛЬНОЕ ОКНО (Существующее) */}
       {selectedProduct && (
         <div className={styles.modal_overlay} onClick={() => setSelectedProduct(null)}>
           <div className={styles.modal_content} onClick={(e) => e.stopPropagation()}>
@@ -331,7 +647,6 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                 </div>
               )}
 
-              {/* ОТРИСОВКА СХЕМ (ИЗ ПАПКИ SCHEME) */}
               {selectedProduct.additionalImages && selectedProduct.additionalImages.length > 0 && (
                 <div style={{ marginTop: "30px", borderTop: "1px solid #e2e8f0", paddingTop: "20px" }}>
                   <h4 className={styles.table_section_title} style={{ marginBottom: "20px" }}>
