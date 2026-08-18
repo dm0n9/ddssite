@@ -169,13 +169,8 @@
   box-shadow: 0 4px 12px rgba(0, 153, 255, 0.2);
 }
 
-.btn_arrow {
-  transition: transform 0.2s ease;
-}
 
-.btn_more:hover .btn_arrow {
-  transform: translateX(4px);
-}
+
 
 /* Адаптивность для планшетов и телефонов */
 @media (max-width: 900px) {

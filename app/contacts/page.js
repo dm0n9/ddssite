@@ -71,13 +71,13 @@ export default function ContactsPage() {
             <h2 className={styles.mapTitle}>{contactsTexts.map_title[currentLang]}</h2>
             <div className={styles.mapContainer}>
               <iframe
-                src="https://go.2gis.com/gtHLT"
+                src="https://yandex.ru/map-widget/v1/?ll=87.104126%2C53.751393&mode=search&oid=192200708031&ol=biz&z=20.2"
                 width="100%"
                 height="100%"
                 frameBorder="0"
                 style={{ border: 0 }}
                 allowFullScreen={true}
-                title="2GIS Map"
+                title="Yandex Map"
               />
             </div>
           </div>
@@ -94,3 +94,5 @@ export default function ContactsPage() {
     </main>
   );
 }
+
+

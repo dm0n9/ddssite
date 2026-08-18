@@ -2,97 +2,68 @@
 
 import styles from "./system.module.css";
 import Link from "next/link";
-import { useLanguage } from "../context/LanguageContext"; // Поддержка мультиязычности, если используется в проекте
+import { useLanguage } from "../context/LanguageContext"; 
 
 interface SystemItem {
   id: string;
-  badge: string;
-  title: Record<string, string>;
+  link: string;
+    title: Record<string, string>;
   desc: Record<string, string>;
   image: string;
-  features: Record<string, string[]>;
-}
+  }
 
 export default function SystemsPage() {
-  // Допускаем использование контекста языка или фоллбек на 'ru'
   const { currentLang = "ru" } = useLanguage ? useLanguage() : { currentLang: "ru" };
 
-  // Данные для 3 больших систем
-  const systemsData: SystemItem[] = [
+  
+ const systemsData: SystemItem[] = [
     {
       id: "system-1",
-      badge: "Комплексное решение",
+      link: "/system/conveyor",
+      
       title: {
-        ru: "Автоматизированная система мониторинга безопасности",
-        en: "Automated Safety Monitoring System",
+        ru: "Система управления конвейерным транспортом",
+        en: "Conveyor Transport Control System",
+        cn: "输送机运输控制系统",
       },
       desc: {
-        ru: "Централизованный комплекс для непрерывного контроля технологических параметров, предотвращения аварийных ситуаций и оповещения персонала в режиме реального времени.",
-        en: "Centralized complex for continuous monitoring of process parameters, accident prevention, and real-time personnel notification.",
+        ru: "Система предназначена для автоматизированного централизованного управления и оперативного контроля разветвленными конвейерными линиями и сопутствующим оборудованием.",
+        en: "The system is designed for automated centralized management and operational monitoring of branched conveyor lines and associated equipment.",
+        cn: "该系统旨在用于分支输送机线及相关设备的自动化集中管理和运行监测。",
       },
-      image: "system_1.jpg", // Замените на реальный файл из public
-      features: {
-        ru: [
-          "Круглосуточный сбор и анализ данных с датчиков",
-          "Интеграция с существующей инфраструктурой предприятия",
-          "Автоматическое включение систем аварийной защиты",
-        ],
-        en: [
-          "24/7 sensor data collection and analysis",
-          "Integration with existing facility infrastructure",
-          "Automatic emergency protection activation",
-        ],
-      },
+      image: "conveyor_1.jpg",
     },
     {
       id: "system-2",
-      badge: "Диспетчеризация",
+      link: "/system/minewatch",
+      
       title: {
-        ru: "Система диспетчерского управления и связи",
-        en: "Dispatch Control and Communication System",
+        ru: "Система MineWATCH",
+        en: "MineWATCH System",
+        cn: "MineWATCH 系统",
       },
       desc: {
-        ru: "Многофункциональная платформа для передачи текстовых и голосовых данных, точного позиционирования объектов и координации действий рабочих бригад.",
-        en: "Multifunctional platform for voice and text data transmission, precise positioning, and crew coordination.",
+        ru: "Комплексная интегрированная система для сквозного автоматизированного управления, диспетчеризации и непрерывного мониторинга всей технологической цепочки шахты с передачей данных на поверхность.",
+        en: "Comprehensive integrated system for end-to-end automated control, dispatching, and continuous monitoring of the entire mine technological chain with data transmission to the surface.",
+        cn: "一套用于整座矿山自动化集中控制、调度和连续监测的综合系统，可将相关数据传输至地面。",
       },
-      image: "system_2.jpg",
-      features: {
-        ru: [
-          "Высокая помехоустойчивость и надежность каналов связи",
-          "Отображение местоположения объектов на интерактивной карте",
-          "Запись и архив всех переговоров и телеметрии",
-        ],
-        en: [
-          "High noise immunity and reliable communication channels",
-          "Interactive map display of personnel and asset locations",
-          "Recording and archiving of all communications and telemetry",
-        ],
-      },
+      image: "PC21-1.jpg",
     },
     {
       id: "system-3",
-      badge: "Энергоуправление",
+      link: "/system/wipan",
+      
       title: {
-        ru: "Система интеллектуального управления энергоснабжением",
-        en: "Intelligent Power Management System",
+        ru: "WiPan Беспроводная персональная сеть",
+        en: "WiPAN Wireless Personal Area Network",
+        cn: "WiPan 无线个人网络",
       },
       desc: {
-        ru: "Инженерный комплекс для оптимизации энергопотребления, контроля качества электропитания и защиты промышленного оборудования от перегрузок.",
-        en: "Engineering solution for energy consumption optimization, power quality control, and equipment overload protection.",
+        ru: "Cистема Davis Derby WiPAN — это беспроводная платформа, которая обеспечивает высоконадежное покрытие беспроводной сетью связи на всей территории шахтной установки.",
+        en: "The Davis Derby WiPAN system is a wireless platform that provides highly reliable wireless communication network coverage throughout the mine installation area.",
+        cn: "戴维斯德比 WiPAN 系统是一个无线平台，可在整个矿井安装区域内提供高可靠性的无线通信网络覆盖。",
       },
-      image: "system_3.jpg",
-      features: {
-        ru: [
-          "Снижение пиковых нагрузок на электросеть",
-          "Детализированная аналитика и отчетность по энергозатратам",
-          "Автоматическое переключение на резервные источники питания",
-        ],
-        en: [
-          "Reduction of peak grid loads",
-          "Detailed analytics and energy consumption reporting",
-          "Automatic failover to backup power sources",
-        ],
-      },
+      image: "wipan_1.jpg",
     },
   ];
 
@@ -125,7 +96,7 @@ export default function SystemsPage() {
                   alt={item.title[currentLang] || item.title.ru}
                   className={styles.system_img}
                   onError={(e) => {
-                    // Заглушка, если картинка не найдена в public
+                  
                     (e.target as HTMLImageElement).src =
                       "https://placehold.co/600x400/0d233a/ffffff?text=System+Image";
                   }}
@@ -136,7 +107,7 @@ export default function SystemsPage() {
               <div className={styles.info_block}>
                 <div>
                   <div className={styles.card_header}>
-                    <span className={styles.card_badge}>{item.badge}</span>
+                    
                     <h2 className={styles.card_title}>
                       {item.title[currentLang] || item.title.ru}
                     </h2>
@@ -146,25 +117,18 @@ export default function SystemsPage() {
                     {item.desc[currentLang] || item.desc.ru}
                   </p>
 
-                  <ul className={styles.features_list}>
-                    {(item.features[currentLang] || item.features.ru).map(
-                      (feature, idx) => (
-                        <li key={idx}>
-                          <span className={styles.bullet}>✓</span>
-                          <span>{feature}</span>
-                        </li>
-                      )
-                    )}
-                  </ul>
+                  
                 </div>
 
-                <button className={styles.btn_more}>
+                
+                <Link href={item.link} className={styles.btn_more}>
                   <span>
-                    {currentLang === "ru" ? "Запросить проект" : "Request a Project"}
+                    {currentLang === "ru" ? "Подробнее о системе" : "System Details"}
                   </span>
-                  <span className={styles.btn_arrow}>→</span>
-                </button>
+                  
+                </Link>
               </div>
+
 
             </article>
           ))}
