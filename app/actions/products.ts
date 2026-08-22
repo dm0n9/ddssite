@@ -289,3 +289,25 @@ export async function toggleProductVisibility(id: string, isHidden: boolean) {
     console.error("❌ [DEBUG] Ошибка в базе данных:", error);
   }
 }
+// ============================================================================
+// 4. ИЗМЕНЕНИЕ ПОРЯДКА ОТОБРАЖЕНИЯ (ПО ЦИФРЕ)
+// ============================================================================
+export async function updateSingleProductOrder(id: string, newOrder: number) {
+  try {
+    const cookieStore = await cookies();
+    const session = cookieStore.get("admin_session");
+    if (session?.value !== "authenticated") {
+      console.error("🚨 Отказ в доступе: нет прав администратора!");
+      return; 
+    }
+
+    await prisma.product.update({
+      where: { id },
+      data: { order: newOrder }
+    });
+
+    revalidatePath("/products");
+  } catch (error) {
+    console.error("Ошибка при сохранении сортировки:", error);
+  }
+}

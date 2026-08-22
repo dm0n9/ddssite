@@ -4,8 +4,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import styles from "./products.module.css";
 import { homeTexts } from "./lang"; 
 import { useLanguage } from "../context/LanguageContext";
-import { addProduct, updateProduct, toggleProductVisibility } from "../actions/products"; 
-
+// ИМПОРТ НОВОЙ ФУНКЦИИ СОРТИРОВКИ
+import { addProduct, updateProduct, toggleProductVisibility, updateSingleProductOrder } from "../actions/products"; 
 
 interface TableRow {
   param: Record<string, string>;
@@ -14,7 +14,7 @@ interface TableRow {
 
 interface Product {
   id: string;
-  ex: string;
+  ex?: string; 
   image: string;
   title: Record<string, string>;
   desc: Record<string, string>;
@@ -23,10 +23,12 @@ interface Product {
   note?: Record<string, string>;
   additionalImages?: string[];
   isHidden?: boolean;
+  order?: number;
 }
 
 function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Product[], isAdmin: boolean }) {
   const { currentLang } = useLanguage();
+  const router = useRouter();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -43,7 +45,6 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
   const [previewData, setPreviewData] = useState({
     title: "",
     desc: "",
-    ex: "",
     imageUrl: "",
     apps: [] as string[],
     specs: [] as { param: string; value: string }[],
@@ -54,7 +55,6 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
   const twLabel = "block text-sm font-semibold text-gray-700 mb-1.5";
   const twAddBtn = "mt-1 bg-gray-100 text-gray-700 font-medium py-1.5 px-3 border border-gray-300 rounded text-sm hover:bg-gray-200 transition-colors self-start";
   const twSectionTitle = "text-lg font-bold text-gray-900 mt-6 mb-3 border-b border-gray-100 pb-2";
-  const router = useRouter();
 
   const uiTexts = {
     btn_more: { ru: "Подробнее", en: "Details", cn: "详情" },
@@ -98,7 +98,6 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
     setPreviewData({
       title: product.title.ru || "",
       desc: product.desc.ru || "",
-      ex: product.ex || "",
       imageUrl: product.image.startsWith('http') || product.image.startsWith('/') ? product.image : `/products/${product.image}`,
       apps: product.specs?.ru || [],
       specs: product.table?.map(r => ({ param: r.param.ru, value: r.value.ru })) || [],
@@ -115,7 +114,15 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
   const handleToggleVisibility = (id: string, currentHidden: boolean) => {
     startTransition(async () => {
       await toggleProductVisibility(id, !currentHidden);
-      router.refresh(); // Принудительно обновляем данные с сервера
+      router.refresh();
+    });
+  };
+
+  // ФУНКЦИЯ ДЛЯ ОТПРАВКИ НОВОГО ПОРЯДКА НА СЕРВЕР
+  const handleOrderChange = (id: string, newOrder: number) => {
+    startTransition(async () => {
+      await updateSingleProductOrder(id, newOrder);
+      router.refresh();
     });
   };
 
@@ -123,7 +130,6 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
     const { name, value } = e.target;
     if (name === "titleRu") setPreviewData((prev) => ({ ...prev, title: value }));
     if (name === "descRu") setPreviewData((prev) => ({ ...prev, desc: value }));
-    if (name === "ex") setPreviewData((prev) => ({ ...prev, ex: value }));
   };
 
   const handleAppChange = (index: number, value: string) => {
@@ -175,7 +181,7 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
       setAppCount(3);
       setSpecCount(3);
       setExtraImgCount(0);
-      setPreviewData({ title: "", desc: "", ex: "", imageUrl: "", apps: [], specs: [], extraImages: {} });
+      setPreviewData({ title: "", desc: "", imageUrl: "", apps: [], specs: [], extraImages: {} });
     });
   };
 
@@ -206,13 +212,12 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
         <div className={styles.container}>
           <div className="w-full mx-auto mb-12 mt-2">
             
-            <div className="grid grid-cols-1 xl:grid-cols-[1fr_600px] gap-8 xl:gap-10 items-start">
+            <div className="grid grid-cols-1 xl:grid-cols-[1fr_600px] gap-8 xl:gap-10">
               
-              {/* ФОРМА */}
               <form 
                 key={editingProduct ? editingProduct.id : 'new-product'}
                 action={handleFormSubmit} 
-                className="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col gap-5"
+                className="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col gap-5 self-start"
                 style={{ padding: "40px" }}
               >
                 <div className="flex justify-between items-center mb-2">
@@ -232,18 +237,12 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                   <label className={twLabel}>Имя файла (латиницей)</label>
                   <input type="text" name="customFileName" defaultValue={editingProduct ? editingProduct.image.replace(/\.[^/.]+$/, "") : ""} placeholder="ОБЯЗАТЕЛЬНО, например: mash-10" required={!editingProduct} className={twInput} />
                 </div>
-                
-                <div>
-                  <label className={twLabel}>Маркировка взрывозащиты</label>
-                  <input type="text" name="ex" defaultValue={editingProduct?.ex} onChange={handlePreviewChange} placeholder="Например: PO EX IA I MA" className={twInput} />
-                </div>
 
                 <div>
                   <label className={twLabel}>Главное фото прибора {editingProduct && "(оставьте пустым, чтобы не менять)"}</label>
                   <input type="file" name="image" accept="image/*" onChange={handleImagePreview} className="w-full border border-gray-300 rounded-md p-1.5 text-sm bg-white file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer" />
                 </div>
 
-                {/* РУССКИЙ */}
                 <h3 className={twSectionTitle}>Контент (Русский)</h3>
                 
                 <div>
@@ -283,7 +282,6 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                   </button>
                 </div>
 
-                {/* АНГЛИЙСКИЙ */}
                 <details className="bg-gray-50 p-4 rounded-md border border-gray-200 mt-2">
                   <summary className="font-bold cursor-pointer text-gray-800 text-sm">Добавить английский перевод</summary>
                   <div className="flex flex-col gap-4 mt-4">
@@ -317,7 +315,6 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                   </div>
                 </details>
 
-                {/* КИТАЙСКИЙ */}
                 <details className="bg-gray-50 p-4 rounded-md border border-gray-200 mt-2">
                   <summary className="font-bold cursor-pointer text-gray-800 text-sm">Добавить китайский перевод</summary>
                   <div className="flex flex-col gap-4 mt-4">
@@ -373,7 +370,7 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                       type="button" 
                       onClick={() => {
                         setEditingProduct(null);
-                        setPreviewData({ title: "", desc: "", ex: "", imageUrl: "", apps: [], specs: [], extraImages: {} });
+                        setPreviewData({ title: "", desc: "", imageUrl: "", apps: [], specs: [], extraImages: {} });
                       }}
                       className="w-full bg-gray-100 text-gray-700 font-medium py-3.5 px-4 rounded-md hover:bg-gray-200 transition-colors text-base"
                     >
@@ -383,17 +380,13 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                 </div>
               </form>
 
-              {/* === ПРАВАЯ ЧАСТЬ ПРЕДПРОСМОТРА === */}
-              <div className="relative">
+              <div className="h-full">
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col sticky top-20 max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full">
                   
                   <div 
-                    className="flex justify-between items-center border-b border-gray-100 sticky top-0 bg-white z-10"
+                    className="flex justify-end items-center border-b border-gray-100 sticky top-0 bg-white z-10"
                     style={{ padding: "20px 40px" }}
                   >
-                    <span className="border border-blue-400 text-blue-600 text-xs font-bold px-3 py-1 rounded">
-                      {previewData.ex || "МАРКИРОВКА EX"}
-                    </span>
                     <div className="flex gap-2">
                       <button disabled className="border border-gray-300 text-gray-500 px-3 py-1 rounded text-sm font-medium opacity-60">Поделиться</button>
                       <button disabled className="border border-gray-300 text-gray-500 px-3 py-1 rounded text-sm font-medium opacity-60">Закрыть</button>
@@ -401,7 +394,7 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                   </div>
 
                   <div style={{ padding: "40px" }}>
-                    <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 xl:gap-8 mb-8 items-start">
+                    <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-8 xl:gap-12 mb-12 items-start">
                       
                       <div className="w-full aspect-square flex items-center justify-center p-2 bg-white border border-gray-100 shadow-sm rounded-lg">
                         {previewData.imageUrl ? (
@@ -414,19 +407,19 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                       </div>
 
                       <div className="min-w-0">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-3 leading-tight break-words hyphens-auto">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-5 leading-tight break-words hyphens-auto">
                           {previewData.title || "Шахтный электроизмерительный прибор..."}
                         </h2>
-                        <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+                        <p className="text-sm text-gray-600 mb-8 leading-relaxed">
                           {previewData.desc || "Универсальный контрольно-измерительный прибор. Заполните данные слева."}
                         </p>
 
                         {previewData.apps.filter(Boolean).length > 0 && (
-                          <div>
-                            <h4 className="text-sm font-bold text-gray-900 mb-2">Область применения:</h4>
-                            <ul className="list-none pl-0 text-sm text-gray-600 flex flex-col gap-1.5">
+                          <div className="mb-4">
+                            <h4 className="text-base font-bold text-gray-900 mb-4">Область применения:</h4>
+                            <ul className="list-none pl-0 text-sm text-gray-600 flex flex-col gap-3">
                               {previewData.apps.filter(Boolean).map((app, idx) => (
-                                <li key={idx} className="leading-relaxed flex items-start gap-2">
+                                <li key={idx} className="leading-relaxed flex items-start gap-2.5">
                                   <span className="text-blue-500 mt-0.5">•</span>
                                   <span>{app}</span>
                                 </li>
@@ -438,8 +431,8 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                     </div>
 
                     {previewData.specs.some(s => s.param || s.value) && (
-                      <div className="mt-6">
-                        <h4 className="text-base font-bold text-gray-900 mb-3">Технические характеристики</h4>
+                      <div className="mt-12">
+                        <h4 className="text-lg font-bold text-gray-900 mb-5">Технические характеристики</h4>
                         <div className="rounded-lg overflow-hidden border border-gray-200">
                           <table className="w-full text-left border-collapse text-sm">
                             <thead>
@@ -452,7 +445,7 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                               {previewData.specs.filter(s => s.param || s.value).map((spec, idx) => (
                                 <tr key={idx} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                                   <td className="py-3 pr-3 font-semibold text-gray-800 bg-gray-50/50" style={{ paddingLeft: '24px' }}>{spec.param || "—"}</td>
-                                  <td className="p-3 text-gray-600 bg-white">{spec.value || "—"}</td>
+                                  <td className="p-4 text-gray-600 bg-white">{spec.value || "—"}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -462,9 +455,9 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                     )}
 
                     {Object.keys(previewData.extraImages).length > 0 && (
-                      <div className="mt-10 border-t border-gray-100 pt-8">
-                        <h4 className="text-base font-bold text-gray-900 mb-5">Схемы и чертежи</h4>
-                        <div className="flex flex-col gap-6">
+                      <div className="mt-14 border-t border-gray-100 pt-10">
+                        <h4 className="text-lg font-bold text-gray-900 mb-6">Схемы и чертежи</h4>
+                        <div className="flex flex-col gap-8">
                           {Object.values(previewData.extraImages).map((imgUrl, idx) => (
                             <div key={idx} className="text-center">
                               <img 
@@ -472,7 +465,7 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                                 alt={`Схема ${idx + 1}`} 
                                 className="w-full rounded-lg border border-gray-200 shadow-sm"
                               />
-                              <p className="mt-3 text-sm font-semibold text-gray-500">Схема {idx + 1}</p>
+                              <p className="mt-4 text-sm font-semibold text-gray-500">Схема {idx + 1}</p>
                             </div>
                           ))}
                         </div>
@@ -508,24 +501,31 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
 
               return (
                 <div key={p.id} className={`${styles.product_card} relative`}>
-                  {/* Панель управления */}
+                  {/* Панель управления с вводом цифры для сортировки */}
                   {isAdmin && isDbProduct && (
                     <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
                       <button onClick={(e) => { e.stopPropagation(); handleEdit(p); }} className="bg-white/95 backdrop-blur-sm border border-blue-200 text-blue-600 px-3 py-1.5 rounded-md text-[11px] font-black uppercase tracking-wider hover:bg-blue-50 shadow-md">✏️ Изменить</button>
-                      <button 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          console.log("Клик по скрытию товара с ID:", p.id); // Проверьте консоль браузера (F12 -> Console)
-                          handleToggleVisibility(p.id, !!p.isHidden); 
-                        }} 
-                        className="..."
-                      >
-                        🚫 Скрыть
-                      </button> 
+                      <button onClick={(e) => { e.stopPropagation(); handleToggleVisibility(p.id, !!p.isHidden); }} className="bg-white/95 backdrop-blur-sm border border-gray-200 text-gray-600 px-3 py-1.5 rounded-md text-[11px] font-black uppercase tracking-wider hover:bg-gray-50 shadow-md">🚫 Скрыть</button>
+                      
+                      {/* Поле прямого ввода порядка */}
+                      <div className="flex items-center gap-2 mt-1 w-full bg-white/95 backdrop-blur-sm border border-gray-200 rounded-md p-1 shadow-md" onClick={(e) => e.stopPropagation()}>
+                        <span className="text-[9px] uppercase font-bold text-gray-500 pl-1.5 whitespace-nowrap">Порядок:</span>
+                        <input 
+                          type="number"
+                          min="1"
+                          defaultValue={p.order && p.order > 0 ? p.order : 1}
+                          onBlur={(e) => handleOrderChange(p.id, parseInt(e.target.value) || 1)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.currentTarget.blur();
+                            }
+                          }}
+                          className="w-full text-center text-xs font-bold border border-gray-300 rounded focus:border-blue-500 outline-none py-1 mr-0.5"
+                        />
+                      </div>
                     </div>
                   )}
                   <div className={styles.card_top_info}>
-                    <div className={styles.card_badge_row}>{p.ex && p.ex !== "Нет данных" && <span className={styles.ex_badge}>{p.ex}</span>}</div>
                     <div className={styles.card_image_container}>
                       <img src={p.image.startsWith('http') || p.image.startsWith('/') ? p.image : `/products/${p.image}`} alt={p.title[currentLang] || p.title.ru} className={styles.product_img} />
                     </div>
@@ -554,15 +554,14 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                   const p = product as Product;
                   return (
                     <div key={p.id} className={`${styles.product_card} relative opacity-60 bg-gray-50`}>
-                      <div className="absolute top-3 right-3 z-20">
+                      <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
                         <button onClick={() => handleToggleVisibility(p.id, !!p.isHidden)} className="bg-white border border-emerald-200 text-emerald-700 px-3 py-1.5 rounded-md text-[11px] font-black uppercase tracking-wider hover:bg-emerald-50 shadow-md">
                           👁️ Показать
                         </button>
                       </div>
                       <div className={styles.card_top_info}>
-                        <div className={styles.card_badge_row}>{p.ex && <span className={styles.ex_badge}>{p.ex}</span>}</div>
                         <div className={styles.card_image_container}>
-                          <img src={p.image.startsWith('http') || p.image.startsWith('/') ? p.image : `/products/${p.image}`} alt={p.title[currentLang]} className={styles.product_img} />
+                          <img src={p.image.startsWith('http') || p.image.startsWith('/') ? p.image : `/products/${p.image}`} alt={p.title[currentLang] || p.title.ru} className={styles.product_img} />
                         </div>
                         <div className={styles.card_info}>
                           <h3 className={styles.card_title}>{p.title[currentLang] || p.title.ru} <span className="text-red-400 text-xs">(Скрыт)</span></h3>
@@ -576,12 +575,12 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
         )}
       </section>
 
-      {/* МОДАЛЬНОЕ ОКНО (Существующее) */}
+      {/* МОДАЛЬНОЕ ОКНО */}
       {selectedProduct && (
         <div className={styles.modal_overlay} onClick={() => setSelectedProduct(null)}>
           <div className={styles.modal_content} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modal_header}>
-              <span className={styles.modal_ex}>{selectedProduct.ex !== "Нет данных" ? selectedProduct.ex : ""}</span>
+              <div></div>
               <div className={styles.modal_header_actions}>
                 <button 
                   className={`${styles.btn_share} ${copiedId === selectedProduct.id ? styles.btn_share_success : ""}`}

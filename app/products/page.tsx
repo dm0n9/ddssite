@@ -13,13 +13,14 @@ export default async function ProductsPage() {
   
   try {
     const rawProducts = await prisma.product.findMany({
-      orderBy: { createdAt: "desc" },
+      // Сначала сортируем по order, затем по дате создания
+      orderBy: [
+        { order: 'asc' },
+        { createdAt: 'desc' }
+      ],
     });
     
     dbProducts = rawProducts.map((item) => {
-      // Отладочная информация в консоль сервера
-      console.log(`Товар: ${item.id}, Схемы в базе:`, item.additionalImages);
-      
       return {
         id: item.id,
         ex: item.ex,
@@ -28,9 +29,9 @@ export default async function ProductsPage() {
         desc: item.shortDesc,
         specs: item.applications,
         table: item.specifications,
-        // САМАЯ ВАЖНАЯ СТРОЧКА (передает схемы на сайт):
         additionalImages: item.additionalImages || [], 
-        isHidden: (item as any).isHidden,
+        isHidden: item.isHidden,
+        order: (item as any).order || 0,
       };
     });
   } catch (error) {

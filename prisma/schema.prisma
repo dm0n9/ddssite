@@ -6,7 +6,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Product {
@@ -20,4 +19,5 @@ model Product {
   createdAt      DateTime @default(now())
   additionalImages String[] @default([])
   isHidden  Boolean  @default(false)
+  order     Int      @default(0)
 }
