@@ -4,8 +4,9 @@ import { useSearchParams, useRouter } from "next/navigation";
 import styles from "./products.module.css";
 import { homeTexts } from "./lang"; 
 import { useLanguage } from "../context/LanguageContext";
-// ИМПОРТ НОВОЙ ФУНКЦИИ СОРТИРОВКИ
-import { addProduct, updateProduct, toggleProductVisibility, updateSingleProductOrder } from "../actions/products"; 
+import { addProduct, updateProduct, toggleProductVisibility, updateSingleProductOrder } from "../actions/products";
+// ДОБАВИЛИ ИМПОРТ ФУНКЦИИ ВЫХОДА
+import { logoutAdmin } from "../actions/auth"; 
 
 interface TableRow {
   param: Record<string, string>;
@@ -33,7 +34,9 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition(); 
+  const [isSaving, setIsSaving] = useState(false); 
+  
   const searchParams = useSearchParams();
 
   const [appCount, setAppCount] = useState(3);
@@ -118,11 +121,18 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
     });
   };
 
-  // ФУНКЦИЯ ДЛЯ ОТПРАВКИ НОВОГО ПОРЯДКА НА СЕРВЕР
   const handleOrderChange = (id: string, newOrder: number) => {
     startTransition(async () => {
       await updateSingleProductOrder(id, newOrder);
       router.refresh();
+    });
+  };
+
+  // ФУНКЦИЯ ДЛЯ ВЫХОДА
+  const handleLogout = () => {
+    startTransition(async () => {
+      await logoutAdmin();
+      router.refresh(); // Принудительно обновляем страницу, чтобы админ-панели исчезли
     });
   };
 
@@ -168,27 +178,53 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
     }
   };
 
-  const handleFormSubmit = (formData: FormData) => {
-    startTransition(async () => {
+  const onSubmitForm = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSaving(true);
+    
+    try {
+      const formData = new FormData(e.currentTarget);
+      
       if (editingProduct) {
         formData.append("productId", editingProduct.id);
         await updateProduct(formData);
       } else {
         await addProduct(formData);
       }
+      
       setIsPanelOpen(false);
       setEditingProduct(null);
       setAppCount(3);
       setSpecCount(3);
       setExtraImgCount(0);
       setPreviewData({ title: "", desc: "", imageUrl: "", apps: [], specs: [], extraImages: {} });
-    });
+      
+      startTransition(() => {
+        router.refresh();
+      });
+
+    } catch (error) {
+      console.error("Ошибка при отправке формы:", error);
+      alert("Ошибка! Возможно, загружаемая картинка слишком большая (более 1-2 МБ). Проверьте консоль разработчика в браузере (F12).");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <main className={styles.main_layout}>
+      {/* ПАНЕЛЬ КНОПОК АДМИНА */}
       {isAdmin && (
-        <div className={styles.container} style={{ display: "flex", justifyContent: "flex-end", padding: "15px 20px" }}>
+        <div className={styles.container} style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "15px 20px" }}>
+          
+          <button 
+            onClick={handleLogout}
+            disabled={isPending}
+            className="px-5 py-2.5 rounded-md font-bold transition-all shadow-sm text-sm border border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+          >
+             Выйти
+          </button>
+
           <button 
             onClick={() => {
               setIsPanelOpen(!isPanelOpen);
@@ -203,7 +239,7 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
               borderColor: isPanelOpen ? "#ef4444" : "#0284c7"
             }}
           >
-            {isPanelOpen ? "✕ Закрыть панель" : "+ Добавить товар"}
+            {isPanelOpen ? "Закрыть панель" : "Добавить товар"}
           </button>
         </div>
       )}
@@ -216,7 +252,7 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
               
               <form 
                 key={editingProduct ? editingProduct.id : 'new-product'}
-                action={handleFormSubmit} 
+                onSubmit={onSubmitForm} 
                 className="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col gap-5 self-start"
                 style={{ padding: "40px" }}
               >
@@ -362,8 +398,8 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                 </div>
 
                 <div className="flex flex-col gap-2 mt-4">
-                  <button type="submit" disabled={isPending} className="w-full bg-[#22c55e] text-white font-medium py-3.5 px-4 rounded-md hover:bg-green-600 transition-colors shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed text-base">
-                    {isPending ? "Сохранение..." : editingProduct ? "Сохранить изменения" : "Создать товар с таблицей и фото"}
+                  <button type="submit" disabled={isSaving} className="w-full bg-[#22c55e] text-white font-medium py-3.5 px-4 rounded-md hover:bg-green-600 transition-colors shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed text-base">
+                    {isSaving ? "Сохранение..." : editingProduct ? "Сохранить изменения" : "Создать товар с таблицей и фото"}
                   </button>
                   {editingProduct && (
                     <button 
@@ -482,17 +518,14 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
         </div>
       )}
 
-      {/* Заголовок сайта */}
       <section className={styles.hero_section}>
         <div className={styles.container}>
           <h1 className={styles.main_title}>{homeTexts["home_page"]?.[currentLang] || "Продукция"}</h1>
         </div>
       </section>
 
-      {/* Каталог */}
       <section className={styles.catalog_section}>
         <div className={`${styles.container} ${styles.product_grid}`}>
-          {/* 1. АКТИВНЫЕ ТОВАРЫ */}
           {allProducts
             .filter(p => !p.isHidden)
             .map((product) => {
@@ -501,16 +534,15 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
 
               return (
                 <div key={p.id} className={`${styles.product_card} relative`}>
-                  {/* Панель управления с вводом цифры для сортировки */}
                   {isAdmin && isDbProduct && (
                     <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
-                      <button onClick={(e) => { e.stopPropagation(); handleEdit(p); }} className="bg-white/95 backdrop-blur-sm border border-blue-200 text-blue-600 px-3 py-1.5 rounded-md text-[11px] font-black uppercase tracking-wider hover:bg-blue-50 shadow-md">✏️ Изменить</button>
-                      <button onClick={(e) => { e.stopPropagation(); handleToggleVisibility(p.id, !!p.isHidden); }} className="bg-white/95 backdrop-blur-sm border border-gray-200 text-gray-600 px-3 py-1.5 rounded-md text-[11px] font-black uppercase tracking-wider hover:bg-gray-50 shadow-md">🚫 Скрыть</button>
+                      <button onClick={(e) => { e.stopPropagation(); handleEdit(p); }} className="bg-white/95 backdrop-blur-sm border border-blue-200 text-blue-600 px-3 py-1.5 rounded-md text-[11px] font-black uppercase tracking-wider hover:bg-blue-50 shadow-md">Изменить</button>
+                      <button onClick={(e) => { e.stopPropagation(); handleToggleVisibility(p.id, !!p.isHidden); }} className="bg-white/95 backdrop-blur-sm border border-gray-200 text-gray-600 px-3 py-1.5 rounded-md text-[11px] font-black uppercase tracking-wider hover:bg-gray-50 shadow-md">Скрыть</button>
                       
-                      {/* Поле прямого ввода порядка */}
                       <div className="flex items-center gap-2 mt-1 w-full bg-white/95 backdrop-blur-sm border border-gray-200 rounded-md p-1 shadow-md" onClick={(e) => e.stopPropagation()}>
                         <span className="text-[9px] uppercase font-bold text-gray-500 pl-1.5 whitespace-nowrap">Порядок:</span>
                         <input 
+                          key={`order-${p.id}-${p.order}`} 
                           type="number"
                           min="1"
                           defaultValue={p.order && p.order > 0 ? p.order : 1}
@@ -543,7 +575,6 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
           })}
         </div>
 
-        {/* 2. СКРЫТЫЕ ТОВАРЫ (Только для админа) */}
         {isAdmin && allProducts.some(p => p.isHidden) && (
           <div className={`${styles.container} mt-20 pt-10 border-t-2 border-dashed border-gray-300`}>
             <h2 className="text-xl font-black text-gray-400 uppercase tracking-widest mb-8">Скрытые товары</h2>
@@ -556,7 +587,7 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                     <div key={p.id} className={`${styles.product_card} relative opacity-60 bg-gray-50`}>
                       <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
                         <button onClick={() => handleToggleVisibility(p.id, !!p.isHidden)} className="bg-white border border-emerald-200 text-emerald-700 px-3 py-1.5 rounded-md text-[11px] font-black uppercase tracking-wider hover:bg-emerald-50 shadow-md">
-                          👁️ Показать
+                          Показать
                         </button>
                       </div>
                       <div className={styles.card_top_info}>
@@ -575,7 +606,6 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
         )}
       </section>
 
-      {/* МОДАЛЬНОЕ ОКНО */}
       {selectedProduct && (
         <div className={styles.modal_overlay} onClick={() => setSelectedProduct(null)}>
           <div className={styles.modal_content} onClick={(e) => e.stopPropagation()}>
