@@ -289,10 +289,8 @@ export async function toggleProductVisibility(id: string, isHidden: boolean) {
     console.error("❌ [DEBUG] Ошибка в базе данных:", error);
   }
 }
-// ============================================================================
-// 4. ИЗМЕНЕНИЕ ПОРЯДКА ОТОБРАЖЕНИЯ (ПО ЦИФРЕ)
-// ============================================================================
-export async function updateSingleProductOrder(id: string, newOrder: number) {
+
+export async function updateSingleProductOrder(id: string, requestedOrder: number) {
   try {
     const cookieStore = await cookies();
     const session = cookieStore.get("admin_session");
@@ -301,11 +299,42 @@ export async function updateSingleProductOrder(id: string, newOrder: number) {
       return; 
     }
 
-    await prisma.product.update({
-      where: { id },
-      data: { order: newOrder }
+    // 1. Получаем все товары из БД, отсортированные по их текущему порядку
+    const products = await prisma.product.findMany({
+      orderBy: [
+        { order: 'asc' },
+        { createdAt: 'desc' }
+      ]
     });
 
+    // 2. Находим индекс товара, который мы хотим переместить
+    const currentIndex = products.findIndex(p => p.id === id);
+    if (currentIndex === -1) return;
+
+    // 3. Вычисляем новый индекс (ограничиваем, чтобы не выйти за пределы)
+    let targetIndex = requestedOrder - 1; 
+    if (targetIndex < 0) targetIndex = 0; // Если ввели отрицательное число или 0 -> ставим первым
+    if (targetIndex >= products.length) targetIndex = products.length - 1; // Если ввели 999 -> ставим последним
+
+    // Если позиция не изменилась, ничего не делаем
+    if (currentIndex === targetIndex) return;
+
+    // 4. Магия массивов: вырезаем товар из старого места и вставляем в новое
+    const [movedProduct] = products.splice(currentIndex, 1);
+    products.splice(targetIndex, 0, movedProduct);
+
+    // 5. Перезаписываем порядок (order) для ВСЕХ товаров строго по очереди (1, 2, 3...)
+    // Используем транзакцию, чтобы обновить всё за одну долю секунды
+    const updates = products.map((p, index) => 
+      prisma.product.update({
+        where: { id: p.id },
+        data: { order: index + 1 } // Строгая нумерация начиная с 1
+      })
+    );
+
+    await prisma.$transaction(updates);
+
+    // Обновляем страницу для всех пользователей
     revalidatePath("/products");
   } catch (error) {
     console.error("Ошибка при сохранении сортировки:", error);
