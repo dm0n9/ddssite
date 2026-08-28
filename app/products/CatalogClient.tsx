@@ -2,7 +2,7 @@
 import { useState, useEffect, Suspense, useTransition } from "react"; 
 import { useSearchParams, useRouter } from "next/navigation";
 import styles from "./products.module.css";
-import { homeTexts } from "./lang"; 
+import { homeTexts } from "./lang";
 import { useLanguage } from "../context/LanguageContext";
 // ИМПОРТ НОВОЙ ФУНКЦИИ СОРТИРОВКИ
 import { addProduct, updateProduct, toggleProductVisibility, updateSingleProductOrder } from "../actions/products"; 
@@ -68,7 +68,7 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
     extra_images: { ru: "Схемы и чертежи", en: "Schemes and Drawings", cn: "图纸 и дополнительные материалы" },
   };
 
-  const allProducts = [...homeTexts.products, ...initialDbProducts] as Product[];
+  const allProducts = initialDbProducts;
   const visibleProducts = allProducts.filter(p => isAdmin ? true : !p.isHidden);
 
   useEffect(() => {

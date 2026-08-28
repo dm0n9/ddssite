@@ -1,7 +1,3 @@
-/* =====================================================================
-   ТОКЕНЫ ОФОРМЛЕНИЯ
-   Меняйте цвета здесь — они применятся сразу по всему сайту.
-   ===================================================================== */
 
 
 .container {
@@ -101,11 +97,13 @@
    HERO (главный слайд)
    ===================================================================== */
 .hero {
-  min-height: 100vh;
+  height: calc(100vh - 100px);
+  min-height: calc(100vh - 100px);
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   position: relative;
-  background-image: linear-gradient(180deg, rgba(16, 38, 63, 0.82) 0%, rgba(16, 38, 63, 0.9) 100%), url('/pexels-usidz-34150292.jpg');
+  background-image: linear-gradient(180deg, rgba(16, 38, 63, 0.82) 0%, rgba(16, 38, 63, 0.9) 100%), url('/mine.jpg');
   background-size: cover;
   background-position: center;
 }
@@ -188,10 +186,14 @@
    ОБЩИЙ КАРКАС "СЛАЙДА" — каждый смысловой блок = один полноэкранный слайд
    ===================================================================== */
 .slide {
-  min-height: 100vh;
+  
+  height: calc(100vh - 100px);;
+  min-height: calc(100vh - 100px);
+  box-sizing: border-box;
   display: flex;
   align-items: center;
-  padding: 110px 0;
+  padding: 0;
+  overflow: hidden;
 }
  
 .slide_white {
@@ -200,8 +202,8 @@
  
 .slide_soft {
   background-color: var(--color-bg-page);
-  border-top: 1px solid var(--color-border);
-  border-bottom: 1px solid var(--color-border);
+  border-top: none;    /* Убрали border */
+  border-bottom: none; /* Убрали border */
 }
  
 .slide_inner {
@@ -245,9 +247,11 @@
 }
 
 .aboutImg {
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
   border-radius: 16px;
   box-shadow: var(--shadow-soft);
-  object-fit: cover;
 }
 
 .statsRow {
@@ -402,15 +406,31 @@
    АДАПТИВНОСТЬ
    ===================================================================== */
 @media (max-width: 968px) {
+  .slide {
+    height: auto;
+    min-height: auto;
+    max-height: none;
+    overflow: visible;
+    padding: 60px 0;
+  }
+
   .aboutGrid {
     flex-direction: column;
     text-align: center;
+    gap: 32px;
   }
+
+  .aboutText h2 {
+    text-align: center !important;
+  }
+
   .statsRow {
     justify-content: center;
+    gap: 24px;
   }
-  .slide {
-    padding: 90px 0;
+
+  .newsGrid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -443,7 +463,7 @@
 
 
 .sliderSlide {
-  height: 90vh;
+  height: 100vh;
   width: 100%;
   display: flex;
   align-items: center;
@@ -456,3 +476,4 @@
   width: 100%;
   height: 100%;
 }
+

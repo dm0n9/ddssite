@@ -30,7 +30,7 @@ export default async function ProductsPage() {
         specs: item.applications,
         table: item.specifications,
         additionalImages: item.additionalImages || [], 
-        isHidden: item.isHidden,
+        isHidden: (item as any).isHidden, 
         order: (item as any).order || 0,
       };
     });

@@ -5,9 +5,9 @@ import { Pool } from 'pg';
 import { homeTexts } from '@/app/products/lang';
 
 const connectionString = process.env.DATABASE_URL;
-
+/*
 if (!connectionString) {
-  throw new Error('DATABASE_URL is not defined in environment variables');
+  throw new Error('DATABASE_URL is not defined in .env');
 }
 
 const pool = new Pool({ connectionString });
@@ -17,7 +17,8 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log('Начинается импорт товаров в базу данных...');
 
-  for (const item of homeTexts.products) {
+  // Используем entries() для получения индекса каждого товара
+  for (const [index, item] of homeTexts.products.entries()) {
     await prisma.product.upsert({
       where: { id: item.id },
       update: {
@@ -32,6 +33,7 @@ async function main() {
         },
         additionalImages: [],
         isHidden: false,
+        order: index + 1, // Порядковый номер: 1, 2, 3...
       },
       create: {
         id: item.id,
@@ -46,10 +48,11 @@ async function main() {
         },
         additionalImages: [],
         isHidden: false,
+        order: index + 1, // Порядковый номер: 1, 2, 3...
       },
     });
 
-    console.log(`✓ Товар импортирован: ${item.id}`);
+    console.log(`✓ Товар импортирован [№${index + 1}]: ${item.id}`);
   }
 
   console.log('Все товары успешно перенесены в PostgreSQL!');
@@ -63,4 +66,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
     await pool.end();
-  });
+  });*/

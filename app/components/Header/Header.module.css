@@ -1,31 +1,22 @@
 /* =====================================================================
    HEADER.MODULE.CSS
-   Единый источник стилей шапки сайта.
-   Используется ТОЛЬКО компонентом app/components/Header/Header.tsx.
-   Больше нигде (Home.module.css, products.module.css, globals.css)
-   классы .header / .nav / .link и т.п. дублироваться не должны.
+   Единый источник стилей унифицированной шапки сайта.
    ===================================================================== */
 
-/* -----------------------------------------------------------------
-   Внешний контейнер шапки.
-   position: sticky + top: 0 держат её прибитой к верху при скролле.
-   z-index: 999 — чтобы шапка была выше карточек/модалок каталога,
-   но ниже модального оверлея товара (у него z-index: 1000).
-   ----------------------------------------------------------------- */
 .header {
-  background-color: #008be2;              /* фирменный сине-голубой фон шапки */
-  box-shadow: 0 4px 12px rgba(0, 139, 226, 0.15); /* мягкая тень под шапкой */
+  background-color: #008be2;
+  box-shadow: 0 4px 12px rgba(0, 139, 226, 0.15);
   position: sticky;
   top: 0;
   z-index: 999;
 }
 
-/* Внутренний ряд: логотип слева, меню по центру, переключатель языка справа */
 .header_flex {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 100px;                          /* фиксированная высота шапки на всех страницах */
+  height: 100px;
+  position: relative; /* Чтобы выпадающее меню позиционировалось ровно под шапкой */
 }
 
 /* -----------------------------------------------------------------
@@ -36,36 +27,64 @@
   align-items: center;
   gap: 5px;
   cursor: pointer;
-  margin-left: 50px;
- }
+  flex-shrink: 0; 
+  padding-left: 20px;
+}
 
 .logo_main {
   font-weight: 800;
   font-size: 24px;
-  color: #ffffff;                         /* "ДДС" — основная часть логотипа */
+  color: #ffffff;
   letter-spacing: 0.5px;
 }
 
 .logo_sub {
   font-weight: 400;
   font-size: 14px;
-  color: #e0f2fe;                         /* "Сибирь" — приглушённый оттенок */
+  color: #e0f2fe;
   text-transform: uppercase;
   letter-spacing: 1px;
-  border-left: 1px solid rgba(255, 255, 255, 0.3); /* разделитель между "ДДС" и "Сибирь" */
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
   padding-left: 8px;
 }
 
 /* -----------------------------------------------------------------
-   НАВИГАЦИЯ (меню пунктов "На главную", "О нас" и т.д.)
+   ДЕЙСТВИЯ СПРАВА (Кнопка бургера + Языки)
+   ----------------------------------------------------------------- */
+.header_right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* Кнопка-гамбургер (скрыта на ПК) */
+.burger_btn {
+  display: none;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.burger_btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* -----------------------------------------------------------------
+   НАВИГАЦИЯ (ДЕСКТОП)
    ----------------------------------------------------------------- */
 .nav {
   display: flex;
   gap: 4px;
   height: 100%;
   align-items: center;
-  overflow-x: auto;                       /* если пунктов много — прокрутка вместо переноса */
-  white-space: nowrap;
+  overflow: visible; /* Убираем появление любых полос прокрутки */
 }
 
 .link {
@@ -73,56 +92,44 @@
   text-decoration: none;
   font-size: 0.92rem;
   font-weight: 500;
-  padding: 10px 16px;
-  height: 100%;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   border-radius: 6px;
+  white-space: nowrap; /* Текст пунктов меню не переносится на две строки */
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Подсветка при наведении курсора */
 .link:hover {
-  background-color: var(--color-navy-soft); /* переменная из globals.css, см. корневые токены */
+  background-color: var(--color-navy-soft, #1a3a5c);
   color: #ffffff;
 }
 
-/* Подсветка пункта меню, соответствующего текущей открытой странице.
-   Раньше существовал как .nav_link_active, но нигде не применялся —
-   теперь навешивается автоматически через usePathname() в Header.tsx */
 .link_active {
   background-color: rgba(0, 0, 0, 0.12);
   font-weight: 600;
-  box-shadow: inset 0 -3px 0 #17619e;      /* белая полоса снизу под активным пунктом */
-}
-
-/* На узких экранах меню скрывается, чтобы не ломать вёрстку шапки.
-   TODO: заменить на бургер-меню, если нужна мобильная навигация */
-@media (max-width: 900px) {
-  .nav {
-    display: none;
-  }
+  box-shadow: inset 0 -3px 0 #ffffff;
 }
 
 /* -----------------------------------------------------------------
-   ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА (RU / EN / CN)
+   ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА
    ----------------------------------------------------------------- */
 .lang_switcher {
   display: flex;
   gap: 4px;
-  margin-right: 50px;
+  padding-right: 20px;
 }
 
 .header_btn {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ffffff;
-  padding: 5px 10px;
+  padding: 6px 10px;
   border-radius: 4px;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .header_btn:hover {
@@ -130,10 +137,51 @@
   border-color: #ffffff;
 }
 
-/* Активная (выбранная сейчас) кнопка языка */
 .header_btn_active {
-  background: #ffffff;                    /* белая заливка */
-  color: #008be2;                         /* текст красится в цвет шапки */
+  background: #ffffff;
+  color: #008be2;
   border-color: #ffffff;
   font-weight: 700;
+}
+
+/* -----------------------------------------------------------------
+   МОБИЛЬНАЯ АДАПТАЦИЯ (Планшеты и Смартфоны <= 1080px)
+   ----------------------------------------------------------------- */
+@media (max-width: 1080px) {
+  .burger_btn {
+    display: block; /* Показываем иконку меню */
+  }
+
+  .nav {
+    display: none; /* Скрываем стандартное меню */
+    position: absolute;
+    top: 100px;
+    left: 0;
+    width: 100%;
+    height: auto;
+    background-color: #008be2;
+    flex-direction: column;
+    padding: 16px 20px 24px 20px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    gap: 8px;
+  }
+
+  /* Класс для показа меню при нажатии */
+  .nav_open {
+    display: flex;
+  }
+
+  .link {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 0;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+
+  .link_active {
+    box-shadow: none;
+    background-color: rgba(0, 0, 0, 0.15);
+  }
 }
