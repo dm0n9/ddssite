@@ -21,3 +21,13 @@ model Product {
   isHidden  Boolean  @default(false)
   order     Int      @default(0)
 }
+model Document {
+  id        String   @id @default(uuid())
+  category  String   // "certificate", "manual", "catalog"
+  file      String   // Имя файла (например, manual.pdf)
+  size      String   // Размер (например, "1.4 Мб")
+  title     Json     // Названия на 3 языках {ru, en, cn}
+  isHidden  Boolean  @default(false)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
