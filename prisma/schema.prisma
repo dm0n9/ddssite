@@ -21,3 +21,18 @@ model Product {
   isHidden  Boolean  @default(false)
   order     Int      @default(0)
 }
+
+model System {
+  id               String   @id @default(uuid())
+  slug             String   @unique
+  ex               String
+  image            String
+  title            Json
+  shortDesc        Json
+  applications     Json    
+  specifications   Json
+  additionalImages String[] @default([])
+  createdAt        DateTime @default(now())
+  isHidden         Boolean  @default(false)
+  order            Int      @default(0)
+}
