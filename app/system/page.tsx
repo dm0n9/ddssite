@@ -1,5 +1,5 @@
 import { prisma } from "@/app/lib/db"; // Убедитесь, что путь к prisma верный
-import SystemsClient from "@/app/system/[slug]/systemClient";
+import SystemsClient from "@/app/system/SystemClient";
 import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";

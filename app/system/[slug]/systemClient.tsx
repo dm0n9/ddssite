@@ -16,10 +16,10 @@ export default function SystemClient({ systemData }: { systemData: any }) {
   };
 
   // В БД массив особенностей сохраняется в поле applications (как у товаров)
-  const features = systemData.applications?.[currentLang] || systemData.applications?.ru || [];
+  const features = systemData?.applications?.[currentLang] || systemData?.applications?.ru || [];
   
   // Таблица сохраняется в поле specifications
-  const tableData = Array.isArray(systemData.specifications) 
+  const tableData = Array.isArray(systemData?.specifications) 
     ? systemData.specifications 
     : [];
 

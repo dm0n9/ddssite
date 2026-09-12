@@ -1,27 +1,18 @@
-import { prisma } from "@/app/lib/db"
+import { prisma } from "@/app/lib/db";
 import { notFound } from "next/navigation";
-import SystemClient from "./systemClient";
+import SystemClient from "./systemClient"; // Убедитесь, что регистр совпадает с названием файла
 
-// Опционально: генерация статических путей для скорости работы
-export async function generateStaticParams() {
-  const systems = await prisma.system.findMany({
-    select: { slug: true },
-  });
+export default async function SystemPage({ params }: { params: Promise<{ slug: string }> | { slug: string } }) {
+  // Распаковываем params для совместимости с новыми версиями Next.js
+  const resolvedParams = await params;
   
-  return systems.map((system) => ({
-    slug: system.slug,
-  }));
-}
-
-export default async function SystemPage({ params }: { params: { slug: string } }) {
-  // Ищем систему в БД по slug, который передали в URL
   const systemData = await prisma.system.findUnique({
-    where: { slug: params.slug },
+    where: { slug: resolvedParams.slug },
   });
 
-  // Если системы с таким URL нет, отдаем страницу 404
+  // Если системы с таким URL нет, отдаем 404
   if (!systemData) {
-    notFound();
+    return notFound();
   }
 
   // Передаем данные в клиентский компонент

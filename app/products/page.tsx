@@ -21,6 +21,7 @@ export default async function ProductsPage() {
     });
     
     dbProducts = rawProducts.map((item) => {
+      const specsData = item.specifications as any;
       return {
         id: item.id,
         ex: item.ex,
@@ -28,7 +29,8 @@ export default async function ProductsPage() {
         title: item.title,
         desc: item.shortDesc,
         specs: item.applications,
-        table: item.specifications,
+        table: specsData?.table || [],
+        note: specsData?.note || undefined,
         additionalImages: item.additionalImages || [], 
         isHidden: (item as any).isHidden, 
         order: (item as any).order || 0,
