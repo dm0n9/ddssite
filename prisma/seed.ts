@@ -5,7 +5,7 @@ import { Pool } from 'pg';
 import { homeTexts } from '@/app/products/lang';
 
 const connectionString = process.env.DATABASE_URL;
-/*
+
 if (!connectionString) {
   throw new Error('DATABASE_URL is not defined in .env');
 }
@@ -66,4 +66,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
     await pool.end();
-  });*/
+  });
