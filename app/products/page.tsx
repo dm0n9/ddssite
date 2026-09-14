@@ -13,7 +13,6 @@ export default async function ProductsPage() {
   
   try {
     const rawProducts = await prisma.product.findMany({
-      // Сначала сортируем по order, затем по дате создания
       orderBy: [
         { order: 'asc' },
         { createdAt: 'desc' }
@@ -22,6 +21,14 @@ export default async function ProductsPage() {
     
     dbProducts = rawProducts.map((item) => {
       const specsData = item.specifications as any;
+      const resolvedTable = Array.isArray(specsData) 
+        ? specsData 
+        : (specsData?.table || []);
+        
+      const resolvedNote = Array.isArray(specsData) 
+        ? undefined 
+        : (specsData?.note || undefined);
+
       return {
         id: item.id,
         ex: item.ex,
@@ -29,8 +36,9 @@ export default async function ProductsPage() {
         title: item.title,
         desc: item.shortDesc,
         specs: item.applications,
-        table: specsData?.table || [],
-        note: specsData?.note || undefined,
+        table: resolvedTable,
+        specifications: resolvedTable, 
+        note: resolvedNote,
         additionalImages: item.additionalImages || [], 
         isHidden: (item as any).isHidden, 
         order: (item as any).order || 0,
