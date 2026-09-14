@@ -1,7 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
 import styles from "./docs.module.css";
-import { docsTexts } from "./lang"; 
 import { useLanguage } from "../context/LanguageContext";
 import { addDocument, updateDocument, toggleDocVisibility, updateDocOrder } from "../actions/documents";
 import { useRouter } from "next/navigation";
@@ -26,17 +25,22 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
   const [isPending, startTransition] = useTransition();
   const [editingDoc, setEditingDoc] = useState<Doc | null>(null);
 
+  // Перенесли заголовок страницы сюда, чтобы полностью избавиться от файла lang.ts
   const uiTexts = {
+    docs_page_title: { 
+      ru: "Техническая документация и сертификаты Девис Дерби Сибирь", 
+      en: "Davis Derby Siberia Technical Documentation & Certificates", 
+      cn: "戴维斯德比西伯利亚技术文档与认证证书" 
+    },
     btn_download: { ru: "Скачать PDF", en: "Download PDF", cn: "下载 PDF" },
     tab_all: { ru: "Все документы", en: "All Docs", cn: "所有文档" },
     tab_certs: { ru: "Сертификаты ТР ТС", en: "Certificates", cn: "认证证书" },
     tab_manuals: { ru: "Руководства и паспорта", en: "Manuals & Passports", cn: "操作手册" },
     tab_catalogs: { ru: "Каталоги", en: "Catalogs", cn: "产品目录" }
   };
-
-  const allDocs = [...docsTexts.documents, ...initialDbDocs] as Doc[];
   
-  const filteredDocs = allDocs.filter((doc) => {
+  // Теперь берем документы ИСКЛЮЧИТЕЛЬНО из базы данных (initialDbDocs)
+  const filteredDocs = initialDbDocs.filter((doc) => {
     if (!isAdmin && doc.isHidden) return false;
     if (activeCategory === "all") return true;
     return doc.category === activeCategory;
@@ -146,7 +150,7 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
       {/* Основной контент */}
       <section className={styles.container} style={{ paddingTop: "40px", paddingBottom: "60px" }}>
         <h1 className={styles.main_title} style={{ margin: "0 0 30px 0" }}>
-          {docsTexts.docs_page_title[currentLang]}
+          {uiTexts.docs_page_title[currentLang]}
         </h1>
 
         {/* Переключатели */}
@@ -168,12 +172,11 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
         {/* Список файлов */}
         <div className={styles.docs_list_container}>
           {filteredDocs.map((doc) => {
-            const isDbDoc = initialDbDocs.some(dbD => dbD.id === doc.id);
             return (
               <div key={doc.id} className={`${styles.doc_row_item} relative`} style={{ opacity: doc.isHidden ? 0.5 : 1 }}>
                 
-                {/* Панель управления */}
-                {isAdmin && isDbDoc && (
+                {/* Панель управления (убрали проверку isDbDoc, т.к. теперь всё из БД) */}
+                {isAdmin && (
                   <div className="absolute top-2 left-2 z-20 flex gap-2">
                     <button onClick={() => handleEdit(doc)} className="bg-white border border-blue-200 text-blue-600 px-2 py-1 rounded text-[10px] font-bold uppercase shadow-sm">✏️ Изменить</button>
                     <button onClick={() => startTransition(() => { toggleDocVisibility(doc.id, !doc.isHidden); router.refresh(); })} className="bg-white border border-gray-200 text-gray-600 px-2 py-1 rounded text-[10px] font-bold uppercase shadow-sm">
@@ -198,7 +201,7 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
 
                 <div className={styles.doc_text_zone}>
                   <h3 className={styles.doc_item_title}>
-                    {doc.title[currentLang]} {doc.isHidden && <span className="text-red-500 text-xs ml-2">(Скрыт)</span>}
+                    {doc.title[currentLang] || doc.title.ru} {doc.isHidden && <span className="text-red-500 text-xs ml-2">(Скрыт)</span>}
                   </h3>
                   <span className={styles.doc_item_size}>{doc.size}</span>
                 </div>
