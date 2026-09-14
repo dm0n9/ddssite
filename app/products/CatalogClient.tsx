@@ -5,10 +5,14 @@ import styles from "./products.module.css";
 import { homeTexts } from "./lang";
 import { useLanguage } from "../context/LanguageContext";
 import { addProduct, updateProduct, toggleProductVisibility, updateSingleProductOrder } from "../actions/products";
-// ДОБАВИЛИ ИМПОРТ ФУНКЦИИ ВЫХОДА
 import { logoutAdmin } from "../actions/auth"; 
 
 interface TableRow {
+  param: Record<string, string>;
+  value: Record<string, string>;
+}
+
+interface SpecificationRow {
   param: Record<string, string>;
   value: Record<string, string>;
 }
@@ -21,6 +25,7 @@ interface Product {
   desc: Record<string, string>;
   specs?: Record<string, string[]>;
   table?: TableRow[];
+  specifications?: SpecificationRow[];
   note?: Record<string, string>;
   additionalImages?: string[];
   isHidden?: boolean;
@@ -95,15 +100,24 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setAppCount(Math.max(3, product.specs?.ru?.length || 3));
-    setSpecCount(Math.max(3, product.table?.length || 3));
+    
+    // Определяем длину характеристик (из specifications или старой table)
+    const specsSource = product.specifications || product.table || [];
+    setSpecCount(Math.max(3, specsSource.length));
     setExtraImgCount(product.additionalImages?.length || 0);
+
+    const mappedSpecs = specsSource.map(r => {
+      const p = typeof r.param === 'object' ? (r.param.ru || Object.values(r.param)[0] || '') : (r.param || '');
+      const v = typeof r.value === 'object' ? (r.value.ru || Object.values(r.value)[0] || '') : (r.value || '');
+      return { param: p, value: v };
+    });
 
     setPreviewData({
       title: product.title.ru || "",
       desc: product.desc.ru || "",
       imageUrl: product.image.startsWith('http') || product.image.startsWith('/') ? product.image : `/products/${product.image}`,
       apps: product.specs?.ru || [],
-      specs: product.table?.map(r => ({ param: r.param.ru, value: r.value.ru })) || [],
+      specs: mappedSpecs,
       extraImages: product.additionalImages?.reduce((acc, img, i) => {
         acc[i] = img.startsWith('http') || img.startsWith('/') ? img : `/products/scheme/${img}`;
         return acc;
@@ -128,11 +142,10 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
     });
   };
 
-  // ФУНКЦИЯ ДЛЯ ВЫХОДА
   const handleLogout = () => {
     startTransition(async () => {
       await logoutAdmin();
-      router.refresh(); // Принудительно обновляем страницу, чтобы админ-панели исчезли
+      router.refresh(); 
     });
   };
 
@@ -306,12 +319,18 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                 <div>
                   <label className={twLabel}>Технические характеристики</label>
                   <div className="flex flex-col gap-2.5">
-                    {Array.from({ length: specCount }).map((_, i) => (
-                      <div key={`specRu${i}`} className="flex flex-col sm:flex-row gap-2.5">
-                        <input type="text" name={`specRu${i + 1}Param`} defaultValue={editingProduct?.table?.[i]?.param.ru} onChange={(e) => handleSpecChange(i, 'param', e.target.value)} placeholder="Параметр (напр: Напряжение)" className={twInput} />
-                        <input type="text" name={`specRu${i + 1}Value`} defaultValue={editingProduct?.table?.[i]?.value.ru} onChange={(e) => handleSpecChange(i, 'value', e.target.value)} placeholder="Значение (напр: 24В)" className={twInput} />
-                      </div>
-                    ))}
+                    {Array.from({ length: specCount }).map((_, i) => {
+                      const specSource = editingProduct?.specifications || editingProduct?.table || [];
+                      const defaultParam = specSource[i] ? (typeof specSource[i].param === 'object' ? specSource[i].param.ru : specSource[i].param) : '';
+                      const defaultValue = specSource[i] ? (typeof specSource[i].value === 'object' ? specSource[i].value.ru : specSource[i].value) : '';
+
+                      return (
+                        <div key={`specRu${i}`} className="flex flex-col sm:flex-row gap-2.5">
+                          <input type="text" name={`specRu${i + 1}Param`} defaultValue={defaultParam} onChange={(e) => handleSpecChange(i, 'param', e.target.value)} placeholder="Параметр (напр: Напряжение)" className={twInput} />
+                          <input type="text" name={`specRu${i + 1}Value`} defaultValue={defaultValue} onChange={(e) => handleSpecChange(i, 'value', e.target.value)} placeholder="Значение (напр: 24В)" className={twInput} />
+                        </div>
+                      );
+                    })}
                   </div>
                   <button type="button" onClick={() => setSpecCount(c => c + 1)} className={twAddBtn}>
                     + Добавить параметр
@@ -340,12 +359,18 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                     <div>
                       <label className={twLabel}>Технические характеристики (EN)</label>
                       <div className="flex flex-col gap-2.5">
-                        {Array.from({ length: specCount }).map((_, i) => (
-                          <div key={`specEn${i}`} className="flex flex-col sm:flex-row gap-2.5">
-                            <input type="text" name={`specEn${i + 1}Param`} defaultValue={editingProduct?.table?.[i]?.param?.en} placeholder="Параметр" className={twInput} />
-                            <input type="text" name={`specEn${i + 1}Value`} defaultValue={editingProduct?.table?.[i]?.value?.en} placeholder="Значение" className={twInput} />
-                          </div>
-                        ))}
+                        {Array.from({ length: specCount }).map((_, i) => {
+                          const specSource = editingProduct?.specifications || editingProduct?.table || [];
+                          const defaultParam = specSource[i] ? (typeof specSource[i].param === 'object' ? specSource[i].param.en : '') : '';
+                          const defaultValue = specSource[i] ? (typeof specSource[i].value === 'object' ? specSource[i].value.en : '') : '';
+
+                          return (
+                            <div key={`specEn${i}`} className="flex flex-col sm:flex-row gap-2.5">
+                              <input type="text" name={`specEn${i + 1}Param`} defaultValue={defaultParam} placeholder="Параметр" className={twInput} />
+                              <input type="text" name={`specEn${i + 1}Value`} defaultValue={defaultValue} placeholder="Значение" className={twInput} />
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
@@ -373,12 +398,18 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                     <div>
                       <label className={twLabel}>Технические характеристики (CN)</label>
                       <div className="flex flex-col gap-2.5">
-                        {Array.from({ length: specCount }).map((_, i) => (
-                          <div key={`specCn${i}`} className="flex flex-col sm:flex-row gap-2.5">
-                            <input type="text" name={`specCn${i + 1}Param`} defaultValue={editingProduct?.table?.[i]?.param?.cn} placeholder="Параметр" className={twInput} />
-                            <input type="text" name={`specCn${i + 1}Value`} defaultValue={editingProduct?.table?.[i]?.value?.cn} placeholder="Значение" className={twInput} />
-                          </div>
-                        ))}
+                        {Array.from({ length: specCount }).map((_, i) => {
+                          const specSource = editingProduct?.specifications || editingProduct?.table || [];
+                          const defaultParam = specSource[i] ? (typeof specSource[i].param === 'object' ? specSource[i].param.cn : '') : '';
+                          const defaultValue = specSource[i] ? (typeof specSource[i].value === 'object' ? specSource[i].value.cn : '') : '';
+
+                          return (
+                            <div key={`specCn${i}`} className="flex flex-col sm:flex-row gap-2.5">
+                              <input type="text" name={`specCn${i + 1}Param`} defaultValue={defaultParam} placeholder="Параметр" className={twInput} />
+                              <input type="text" name={`specCn${i + 1}Value`} defaultValue={defaultValue} placeholder="Значение" className={twInput} />
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
@@ -649,7 +680,8 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                 </div>
               </div>
 
-              {selectedProduct.table && selectedProduct.table.length > 0 && (
+              {/* ТЕХНИЧЕСКИЕ ХАРАКТЕРИСТИКИ (поддерживает specifications и table) */}
+              {((selectedProduct.specifications && selectedProduct.specifications.length > 0) || (selectedProduct.table && selectedProduct.table.length > 0)) && (
                 <div className={styles.modal_table_zone}>
                   <h4 className={styles.table_section_title}>{uiTexts.table_title[currentLang]}</h4>
                   <table className={styles.tech_table}>
@@ -660,12 +692,17 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                       </tr>
                     </thead>
                     <tbody>
-                      {selectedProduct.table.map((row, idx) => (
-                        <tr key={idx}>
-                          <td className={styles.td_param}>{row.param[currentLang]}</td>
-                          <td className={styles.td_value}>{row.value[currentLang]}</td>
-                        </tr>
-                      ))}
+                      {(selectedProduct.specifications || selectedProduct.table)?.map((row: any, idx: number) => {
+                        const paramText = row.param?.[currentLang] || row.param?.ru || Object.values(row.param || {})[0] || "—";
+                        const valueText = row.value?.[currentLang] || row.value?.ru || Object.values(row.value || {})[0] || "—";
+
+                        return (
+                          <tr key={idx}>
+                            <td className={styles.td_param}>{paramText}</td>
+                            <td className={styles.td_value}>{valueText}</td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                   {selectedProduct.note && (

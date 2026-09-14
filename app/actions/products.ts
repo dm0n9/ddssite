@@ -98,6 +98,15 @@ export async function addProduct(formData: FormData) {
       };
     });
 
+    // --- ВЫЧИСЛЕНИЕ ПОРЯДКОВОГО НОМЕРА ---
+    const lastProduct = await prisma.product.findFirst({
+      orderBy: { order: 'desc' },
+      select: { order: true }
+    });
+    
+    // Если товары есть, берем максимальный order + 1. Если база пустая, ставим 1.
+    const newOrder = lastProduct?.order ? lastProduct.order + 1 : 1;
+
     // --- СОХРАНЕНИЕ В БАЗУ ДАННЫХ ---
     await prisma.product.create({
       data: {
@@ -112,6 +121,7 @@ export async function addProduct(formData: FormData) {
           cn: getApps("Cn").length > 0 ? getApps("Cn") : getApps("Ru") 
         },
         specifications: finalTable,
+        order: newOrder, // АВТОМАТИЧЕСКИЙ ПОРЯДКОВЫЙ НОМЕР
       },
     });
 
@@ -268,21 +278,16 @@ export async function toggleProductVisibility(id: string, isHidden: boolean) {
   try {
     const cookieStore = await cookies();
     const session = cookieStore.get("admin_session");
-    console.log("🔍 [DEBUG] Значение куки admin_session:", session?.value);
 
     if (session?.value !== "authenticated") {
       console.error("🚨 [DEBUG] Ошибка: сессия админа не прошла проверку!");
       return; 
     }
 
-    console.log(`🔍 [DEBUG] Пытаемся обновить товар ${id}, установить isHidden = ${isHidden}`);
-
-    const updated = await prisma.product.update({
+    await prisma.product.update({
       where: { id: String(id) },
       data: { isHidden }
     });
-
-    console.log("✅ [DEBUG] Успешно обновлено в базе:", updated);
 
     revalidatePath("/products");
   } catch (error) {
@@ -290,6 +295,9 @@ export async function toggleProductVisibility(id: string, isHidden: boolean) {
   }
 }
 
+// ============================================================================
+// 4. ИЗМЕНЕНИЕ ПОРЯДКА СОРТИРОВКИ
+// ============================================================================
 export async function updateSingleProductOrder(id: string, requestedOrder: number) {
   try {
     const cookieStore = await cookies();
