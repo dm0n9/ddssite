@@ -155,7 +155,7 @@
   .nav {
     display: none; /* Скрываем стандартное меню */
     position: absolute;
-    top: 100px;
+    top: 80px;
     left: 0;
     width: 100%;
     height: auto;
@@ -183,5 +183,72 @@
   .link_active {
     box-shadow: none;
     background-color: rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Смартфоны (<= 768px) */
+@media (max-width: 768px) {
+  /* Уменьшаем высоту шапки и сбрасываем жесткие боковые зазоры */
+  .header_flex {
+    height: 70px;
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  /* Сбрасываем жесткий левый отступ у логотипа */
+  .logo_block {
+    padding-left: 0;
+    gap: 8px;
+    min-width: 0; /* Разрешаем блоку логотипа гибко подстраиваться */
+  }
+
+  /* Уменьшаем размер главного логотипа */
+  .logo_main {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  /* Главная корректировка: уменьшаем надпись в заголовке, чтобы всё поместилось */
+  .logo_sub {
+    font-size: 10.5px;
+    letter-spacing: 0.3px;
+    padding-left: 6px;
+    line-height: 1.1;
+    white-space: normal; /* Разрешаем аккуратный перенос в 2 строки на экстремально узких экранах */
+    max-width: 110px;
+  }
+
+  /* Компактный правый блок */
+  .header_right {
+    gap: 6px;
+  }
+
+  .lang_switcher {
+    padding-right: 0; /* Убираем 20px паразитного отступа справа */
+    gap: 2px;
+  }
+
+  /* Делаем переключатели языков компактнее */
+  .header_btn {
+    padding: 5px 6px;
+    font-size: 10px;
+  }
+
+  /* Кнопка бургера */
+  .burger_btn {
+    padding: 6px 9px;
+    font-size: 18px;
+  }
+
+  /* Корректируем позицию выпадающего меню под высоту 70px */
+  .nav {
+    top: 70px;
+  }
+}
+
+/* На экранах тоньше 380px (iPhone SE и аналоги) скрываем длинный подзаголовок */
+@media (max-width: 380px) {
+  .logo_sub {
+    display: none; /* Оставляем только компактный логотип «ДДС» */
   }
 }
