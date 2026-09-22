@@ -37,7 +37,6 @@ export default function SystemClient({ systemData }: { systemData: any }) {
         {/* Карточка системы */}
         <article className={styles.content_card}>
           <div className={styles.header_row}>
-            <span className={styles.ex_badge}>{systemData.ex}</span>
           </div>
 
           <div className={styles.grid_two_cols}>

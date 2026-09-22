@@ -123,63 +123,67 @@ export const Carousel = () => {
               position: "relative",
               flex: "0 0 100%",
               maxWidth: "100%",
-              height: "100%",
+              aspectRatio: "16 / 9", 
+              maxHeight: "calc(100vh - 100px)", 
+              overflow: "hidden",
             }}
           >
             {/* Картинка слайда */}
-            <Image
-              src={card.imgUrl}
-              // ДОБАВЛЕНО [currentLang]
-              alt={card.alt[currentLang] || "slide"}
-              fill
-              sizes="100vw"
-              style={{ objectFit: "cover" }}
-              priority={index === 1}
-            />
+<div style={{ position: "relative", width: "100%", height: "100%", backgroundColor: "#0d233a" }}>
+  <Image
+    src={card.imgUrl}
+    alt={card.alt[currentLang] || "slide"}
+    fill
+    sizes="(max-width: 768px) 100vw, 100vw"
+    style={{ 
+      objectFit: "contain", /* Картинка сжимается и уменьшается пропорционально, без обрезки */
+      objectPosition: "center" 
+    }}
+    priority={index === 1}
+  />
+</div>
 
-            {/*  ТЕКСТОВЫЙ ОВЕРЛЕЙ ПОВЕРХ ИЗОБРАЖЕНИЯ  */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                width: "100%",
-                backgroundColor: "rgba(0, 0, 0, 0.65)",
-                backdropFilter: "blur(4px)",
-                padding: "24px 32px 60px 32px",
-                boxSizing: "border-box",
-                color: "#ffffff",
-                zIndex: 1,
-              }}
-            >
-              {card.title && (
-                <h3
-                  style={{
-                    margin: "0 0 8px 0",
-                    fontSize: "1.9rem",
-                    fontWeight: 600,
-                    color: "#ffffff",
-                  }}
-                >
-                  {/* ДОБАВЛЕНО [currentLang] */}
-                  {card.title[currentLang]}
-                </h3>
-              )}
-              {card.description && (
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "1.4rem",
-                    lineHeight: 1.5,
-                    color: "rgba(255, 255, 255, 0.85)",
-                    maxWidth: "800px",
-                  }}
-                >
-                  {/* ДОБАВЛЕНО [currentLang] */}
-                  {card.description[currentLang]}
-                </p>
-              )}
-            </div>
+            {/* ТЕКСТОВЫЙ ОВЕРЛЕЙ ПОВЕРХ ИЗОБРАЖЕНИЯ */}
+<div
+  style={{
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backdropFilter: "blur(4px)",
+    padding: "16px 20px 48px 20px", /* Уменьшенные отступы снизу */
+    boxSizing: "border-box",
+    color: "#ffffff",
+    zIndex: 1,
+  }}
+>
+  {card.title && (
+    <h3
+      style={{
+        margin: "0 0 6px 0",
+        fontSize: "clamp(1.1rem, 2.5vw, 1.8rem)", /* Плавно сжимается при уменьшении экрана */
+        fontWeight: 600,
+        color: "#ffffff",
+      }}
+    >
+      {card.title[currentLang]}
+    </h3>
+  )}
+  {card.description && (
+    <p
+      style={{
+        margin: 0,
+        fontSize: "clamp(0.85rem, 1.8vw, 1.2rem)", /* Плавно уменьшается */
+        lineHeight: 1.4,
+        color: "rgba(255, 255, 255, 0.85)",
+        maxWidth: "800px",
+      }}
+    >
+      {card.description[currentLang]}
+    </p>
+  )}
+</div>
           </div>
         ))}
       </div>
