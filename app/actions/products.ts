@@ -4,347 +4,288 @@ import { prisma } from "../lib/db";
 import { revalidatePath } from "next/cache";
 import fs from "fs/promises";
 import path from "path";
-import { cookies } from "next/headers";
 
-// ============================================================================
-// 1. ДОБАВЛЕНИЕ НОВОГО ТОВАРА
-// ============================================================================
-export async function addProduct(formData: FormData) {
-  try {
-    // --- ПРОВЕРКА АВТОРИЗАЦИИ ---
-    const cookieStore = await cookies();
-    const session = cookieStore.get("admin_session");
-    if (session?.value !== "authenticated") {
-      console.error("🚨 Отказ в доступе: нет прав администратора!");
-      return; 
-    }
+// Вспомогательная функция: гарантирует строгий порядок 1, 2, 3... без пропусков
+async function reindexVisibleProducts() {
+  const visibleProducts = await prisma.product.findMany({
+    where: { isHidden: false },
+    orderBy: [
+      { order: "asc" },
+      { createdAt: "desc" }
+    ],
+  });
 
-    const titleRu = formData.get("titleRu")?.toString() || "Новый прибор";
-    const titleEn = formData.get("titleEn")?.toString() || titleRu;
-    const titleCn = formData.get("titleCn")?.toString() || titleRu;
+  const updates = visibleProducts.map((prod, index) =>
+    prisma.product.update({
+      where: { id: prod.id },
+      data: { order: index + 1 },
+    })
+  );
 
-    const descRu = formData.get("descRu")?.toString() || "Описание отсутствует";
-    const descEn = formData.get("descEn")?.toString() || descRu;
-    const descCn = formData.get("descCn")?.toString() || descRu;
-
-    const ex = formData.get("ex")?.toString() || "Нет данных";
-    const customFileName = formData.get("customFileName")?.toString().trim() || "product";
-    const cleanName = customFileName.replace(/\.[^/.]+$/, "").replace(/[^a-z0-9-]/gi, '-'); 
-
-    const appCount = parseInt(formData.get("appCount")?.toString() || "3", 10);
-    const specCount = parseInt(formData.get("specCount")?.toString() || "3", 10);
-    const extraImgCount = parseInt(formData.get("extraImgCount")?.toString() || "0", 10);
-
-    // --- ОБРАБОТКА ГЛАВНОГО ФОТО ---
-    const imageFile = formData.get("image") as File | null;
-    let imageFileName = "placeholder.jpg"; 
-
-    if (imageFile && imageFile.size > 0) {
-      const buffer = Buffer.from(await imageFile.arrayBuffer());
-      const shortId = Math.random().toString(36).substring(2, 6);
-      const extension = imageFile.name.split('.').pop() || 'jpg';
-      
-      imageFileName = `${cleanName}-${shortId}.${extension}`;
-      const savePath = path.join(process.cwd(), "public", "products", imageFileName);
-      await fs.writeFile(savePath, buffer);
-    }
-
-    // --- ОБРАБОТКА ДОПОЛНИТЕЛЬНЫХ ФОТО (СХЕМ) ---
-    const extraImagesPaths: string[] = [];
-    const schemesDir = path.join(process.cwd(), "public", "products", "scheme");
-    await fs.mkdir(schemesDir, { recursive: true }).catch(() => {});
-
-    for (let i = 1; i <= extraImgCount; i++) {
-      const extraFile = formData.get(`extraImg${i}`) as File | null;
-      if (extraFile && extraFile.size > 0) {
-        const buffer = Buffer.from(await extraFile.arrayBuffer());
-        const shortId = Math.random().toString(36).substring(2, 6);
-        const extension = extraFile.name.split('.').pop() || 'jpg';
-        
-        const extraFileName = `scheme-${cleanName}-${i}-${shortId}.${extension}`;
-        const savePath = path.join(schemesDir, extraFileName);
-        
-        await fs.writeFile(savePath, buffer);
-        extraImagesPaths.push(extraFileName);
-      }
-    }
-
-    // --- ОБРАБОТКА ДИНАМИЧЕСКИХ СПИСКОВ И ТАБЛИЦ ---
-    const getApps = (lang: string) => {
-      const apps = [];
-      for (let i = 1; i <= appCount; i++) {
-        const val = formData.get(`app${lang}${i}`)?.toString().trim();
-        if (val) apps.push(val);
-      }
-      return apps;
-    };
-
-    const getTable = (lang: string) => {
-      const table = [];
-      for (let i = 1; i <= specCount; i++) {
-        const param = formData.get(`spec${lang}${i}Param`)?.toString().trim();
-        const value = formData.get(`spec${lang}${i}Value`)?.toString().trim();
-        if (param && value) table.push({ param, value });
-      }
-      return table;
-    };
-
-    const finalTable = getTable("Ru").map((row, index) => {
-      const tEn = getTable("En");
-      const tCn = getTable("Cn");
-      return {
-        param: { ru: row.param, en: tEn[index]?.param || row.param, cn: tCn[index]?.param || row.param },
-        value: { ru: row.value, en: tEn[index]?.value || row.value, cn: tCn[index]?.value || row.value }
-      };
-    });
-
-    // --- ВЫЧИСЛЕНИЕ ПОРЯДКОВОГО НОМЕРА ---
-    const lastProduct = await prisma.product.findFirst({
-      orderBy: { order: 'desc' },
-      select: { order: true }
-    });
-    
-    // Если товары есть, берем максимальный order + 1. Если база пустая, ставим 1.
-    const newOrder = lastProduct?.order ? lastProduct.order + 1 : 1;
-
-    // --- СОХРАНЕНИЕ В БАЗУ ДАННЫХ ---
-    await prisma.product.create({
-      data: {
-        title: { ru: titleRu, en: titleEn, cn: titleCn },
-        shortDesc: { ru: descRu, en: descEn, cn: descCn },
-        ex: ex,
-        image: imageFileName,
-        additionalImages: extraImagesPaths,
-        applications: { 
-          ru: getApps("Ru"), 
-          en: getApps("En").length > 0 ? getApps("En") : getApps("Ru"), 
-          cn: getApps("Cn").length > 0 ? getApps("Cn") : getApps("Ru") 
-        },
-        specifications: finalTable,
-        order: newOrder, // АВТОМАТИЧЕСКИЙ ПОРЯДКОВЫЙ НОМЕР
-      },
-    });
-
-    revalidatePath("/products");
-  } catch (error) {
-    console.error("Ошибка при добавлении товара:", error);
+  if (updates.length > 0) {
+    await prisma.$transaction(updates);
   }
 }
 
-// ============================================================================
-// 2. ОБНОВЛЕНИЕ СУЩЕСТВУЮЩЕГО ТОВАРА
-// ============================================================================
-export async function updateProduct(formData: FormData) {
-  try {
-    // --- ПРОВЕРКА АВТОРИЗАЦИИ ---
-    const cookieStore = await cookies();
-    const session = cookieStore.get("admin_session");
-    if (session?.value !== "authenticated") {
-      console.error("🚨 Отказ в доступе: нет прав администратора!");
-      return; 
-    }
-
-    const productId = formData.get("productId")?.toString();
-    if (!productId) {
-      console.error("🚨 Ошибка: ID товара не передан для обновления!");
-      return;
-    }
-
-    // Получаем текущий товар из базы, чтобы не затереть старые картинки
-    const existingProduct = await prisma.product.findUnique({
-      where: { id: productId }
-    });
-
-    if (!existingProduct) {
-      console.error("🚨 Ошибка: Обновляемый товар не найден в базе!");
-      return;
-    }
-
-    const titleRu = formData.get("titleRu")?.toString() || "Новый прибор";
-    const titleEn = formData.get("titleEn")?.toString() || titleRu;
-    const titleCn = formData.get("titleCn")?.toString() || titleRu;
-
-    const descRu = formData.get("descRu")?.toString() || "Описание отсутствует";
-    const descEn = formData.get("descEn")?.toString() || descRu;
-    const descCn = formData.get("descCn")?.toString() || descRu;
-
-    const ex = formData.get("ex")?.toString() || "Нет данных";
-    const customFileName = formData.get("customFileName")?.toString().trim() || "product";
-    const cleanName = customFileName.replace(/\.[^/.]+$/, "").replace(/[^a-z0-9-]/gi, '-'); 
-
-    const appCount = parseInt(formData.get("appCount")?.toString() || "3", 10);
-    const specCount = parseInt(formData.get("specCount")?.toString() || "3", 10);
-    const extraImgCount = parseInt(formData.get("extraImgCount")?.toString() || "0", 10);
-
-    // --- ОБРАБОТКА ГЛАВНОГО ФОТО ---
-    const imageFile = formData.get("image") as File | null;
-    let imageFileName = existingProduct.image; // Если фото не меняли, оставляем старое
-
-    if (imageFile && imageFile.size > 0) {
-      const buffer = Buffer.from(await imageFile.arrayBuffer());
-      const shortId = Math.random().toString(36).substring(2, 6);
-      const extension = imageFile.name.split('.').pop() || 'jpg';
-      
-      imageFileName = `${cleanName}-${shortId}.${extension}`;
-      const savePath = path.join(process.cwd(), "public", "products", imageFileName);
-      await fs.writeFile(savePath, buffer);
-    }
-
-    // --- ОБРАБОТКА ДОПОЛНИТЕЛЬНЫХ ФОТО (СХЕМ) ---
-    const extraImagesPaths: string[] = [];
-    const schemesDir = path.join(process.cwd(), "public", "products", "scheme");
-    await fs.mkdir(schemesDir, { recursive: true }).catch(() => {});
-
-    // Получаем массив старых схем
-    const oldExtraImages = (existingProduct.additionalImages as string[]) || [];
-
-    for (let i = 1; i <= extraImgCount; i++) {
-      const extraFile = formData.get(`extraImg${i}`) as File | null;
-      
-      if (extraFile && extraFile.size > 0) {
-        // Если загружен новый файл схемы
-        const buffer = Buffer.from(await extraFile.arrayBuffer());
-        const shortId = Math.random().toString(36).substring(2, 6);
-        const extension = extraFile.name.split('.').pop() || 'jpg';
-        
-        const extraFileName = `scheme-${cleanName}-${i}-${shortId}.${extension}`;
-        const savePath = path.join(schemesDir, extraFileName);
-        
-        await fs.writeFile(savePath, buffer);
-        extraImagesPaths.push(extraFileName);
-      } else if (oldExtraImages[i - 1]) {
-        // Если файл не загрузили, но на этом месте была старая схема — оставляем её
-        extraImagesPaths.push(oldExtraImages[i - 1]);
-      }
-    }
-
-    // --- ОБРАБОТКА ДИНАМИЧЕСКИХ СПИСКОВ И ТАБЛИЦ ---
-    const getApps = (lang: string) => {
-      const apps = [];
-      for (let i = 1; i <= appCount; i++) {
-        const val = formData.get(`app${lang}${i}`)?.toString().trim();
-        if (val) apps.push(val);
-      }
-      return apps;
-    };
-
-    const getTable = (lang: string) => {
-      const table = [];
-      for (let i = 1; i <= specCount; i++) {
-        const param = formData.get(`spec${lang}${i}Param`)?.toString().trim();
-        const value = formData.get(`spec${lang}${i}Value`)?.toString().trim();
-        if (param && value) table.push({ param, value });
-      }
-      return table;
-    };
-
-    const finalTable = getTable("Ru").map((row, index) => {
-      const tEn = getTable("En");
-      const tCn = getTable("Cn");
-      return {
-        param: { ru: row.param, en: tEn[index]?.param || row.param, cn: tCn[index]?.param || row.param },
-        value: { ru: row.value, en: tEn[index]?.value || row.value, cn: tCn[index]?.value || row.value }
-      };
-    });
-
-    // --- ОБНОВЛЕНИЕ ДАННЫХ В БАЗЕ ---
-    await prisma.product.update({
-      where: { id: productId },
-      data: {
-        title: { ru: titleRu, en: titleEn, cn: titleCn },
-        shortDesc: { ru: descRu, en: descEn, cn: descCn },
-        ex: ex,
-        image: imageFileName,
-        additionalImages: extraImagesPaths,
-        applications: { 
-          ru: getApps("Ru"), 
-          en: getApps("En").length > 0 ? getApps("En") : getApps("Ru"), 
-          cn: getApps("Cn").length > 0 ? getApps("Cn") : getApps("Ru") 
-        },
-        specifications: finalTable,
-      },
-    });
-
-    revalidatePath("/products");
-  } catch (error) {
-    console.error("Ошибка при обновлении товара:", error);
-  }
-}
-
-// ============================================================================
-// 3. ПЕРЕКЛЮЧАТЕЛЬ ВИДИМОСТИ (СКРЫТЬ / ПОКАЗАТЬ)
-// ============================================================================
+// Переключение видимости (скрыть / показать) со сжатием номеров
 export async function toggleProductVisibility(id: string, isHidden: boolean) {
   try {
-    const cookieStore = await cookies();
-    const session = cookieStore.get("admin_session");
-
-    if (session?.value !== "authenticated") {
-      console.error("🚨 [DEBUG] Ошибка: сессия админа не прошла проверку!");
-      return; 
-    }
-
     await prisma.product.update({
-      where: { id: String(id) },
-      data: { isHidden }
+      where: { id },
+      data: {
+        isHidden,
+        order: isHidden ? 0 : 9999, // Скрытым даем 0, восстанавливаемым — в конец
+      },
     });
 
+    await reindexVisibleProducts();
+
     revalidatePath("/products");
+    revalidatePath("/");
+    return { success: true };
   } catch (error) {
-    console.error("❌ [DEBUG] Ошибка в базе данных:", error);
+    console.error("Ошибка при переключении видимости товара:", error);
+    throw error;
   }
 }
 
-// ============================================================================
-// 4. ИЗМЕНЕНИЕ ПОРЯДКА СОРТИРОВКИ
-// ============================================================================
-export async function updateSingleProductOrder(id: string, requestedOrder: number) {
+// Ручное изменение порядка без дублирования и сдвигов
+export async function updateSingleProductOrder(id: string, targetOrder: number) {
   try {
-    const cookieStore = await cookies();
-    const session = cookieStore.get("admin_session");
-    if (session?.value !== "authenticated") {
-      console.error("🚨 Отказ в доступе: нет прав администратора!");
-      return; 
-    }
-
-    // 1. Получаем все товары из БД, отсортированные по их текущему порядку
-    const products = await prisma.product.findMany({
+    const visibleProducts = await prisma.product.findMany({
+      where: { isHidden: false },
       orderBy: [
-        { order: 'asc' },
-        { createdAt: 'desc' }
-      ]
+        { order: "asc" },
+        { createdAt: "desc" }
+      ],
     });
 
-    // 2. Находим индекс товара, который мы хотим переместить
-    const currentIndex = products.findIndex(p => p.id === id);
-    if (currentIndex === -1) return;
+    const targetProduct = visibleProducts.find((p) => p.id === id);
+    if (!targetProduct) return { success: false };
 
-    // 3. Вычисляем новый индекс (ограничиваем, чтобы не выйти за пределы)
-    let targetIndex = requestedOrder - 1; 
-    if (targetIndex < 0) targetIndex = 0; // Если ввели отрицательное число или 0 -> ставим первым
-    if (targetIndex >= products.length) targetIndex = products.length - 1; // Если ввели 999 -> ставим последним
+    // Убираем перемещаемый товар из списка
+    const filtered = visibleProducts.filter((p) => p.id !== id);
 
-    // Если позиция не изменилась, ничего не делаем
-    if (currentIndex === targetIndex) return;
+    // Вычисляем корректную позицию вставки
+    const newIndex = Math.max(0, Math.min(targetOrder - 1, filtered.length));
+    filtered.splice(newIndex, 0, targetProduct);
 
-    // 4. Магия массивов: вырезаем товар из старого места и вставляем в новое
-    const [movedProduct] = products.splice(currentIndex, 1);
-    products.splice(targetIndex, 0, movedProduct);
-
-    // 5. Перезаписываем порядок (order) для ВСЕХ товаров строго по очереди (1, 2, 3...)
-    // Используем транзакцию, чтобы обновить всё за одну долю секунды
-    const updates = products.map((p, index) => 
+    // Присваиваем непрерывные номера 1, 2, 3...
+    const reorderQueries = filtered.map((prod, index) =>
       prisma.product.update({
-        where: { id: p.id },
-        data: { order: index + 1 } // Строгая нумерация начиная с 1
+        where: { id: prod.id },
+        data: { order: index + 1 },
       })
     );
 
-    await prisma.$transaction(updates);
+    await prisma.$transaction(reorderQueries);
 
-    // Обновляем страницу для всех пользователей
     revalidatePath("/products");
+    revalidatePath("/");
+    return { success: true };
   } catch (error) {
-    console.error("Ошибка при сохранении сортировки:", error);
+    console.error("Ошибка при обновлении порядка товара:", error);
+    throw error;
+  }
+}
+
+// Создание нового товара
+export async function addProduct(formData: FormData) {
+  try {
+    const customFileName = formData.get("customFileName")?.toString().trim() || `product-${Date.now()}`;
+    const ex = formData.get("ex")?.toString().trim() || "Ex ia I Ma";
+    const imageFile = formData.get("image") as File | null;
+    
+    let imageName = "";
+    if (imageFile && imageFile.size > 0) {
+      const ext = imageFile.name.split(".").pop() || "jpg";
+      imageName = `${customFileName}.${ext}`;
+      const uploadDir = path.join(process.cwd(), "public", "products");
+      await fs.mkdir(uploadDir, { recursive: true });
+      const buffer = Buffer.from(await imageFile.arrayBuffer());
+      await fs.writeFile(path.join(uploadDir, imageName), buffer);
+    }
+
+    const appCount = parseInt(formData.get("appCount")?.toString() || "3");
+    const specCount = parseInt(formData.get("specCount")?.toString() || "3");
+    const extraImgCount = parseInt(formData.get("extraImgCount")?.toString() || "0");
+
+    const appsRu: string[] = [];
+    const appsEn: string[] = [];
+    const appsCn: string[] = [];
+    for (let i = 1; i <= appCount; i++) {
+      const r = formData.get(`appRu${i}`)?.toString().trim();
+      const e = formData.get(`appEn${i}`)?.toString().trim();
+      const c = formData.get(`appCn${i}`)?.toString().trim();
+      if (r) appsRu.push(r);
+      if (e) appsEn.push(e);
+      if (c) appsCn.push(c);
+    }
+
+    const specs: any[] = [];
+    for (let i = 1; i <= specCount; i++) {
+      const pRu = formData.get(`specRu${i}Param`)?.toString().trim();
+      const vRu = formData.get(`specRu${i}Value`)?.toString().trim();
+      const pEn = formData.get(`specEn${i}Param`)?.toString().trim() || pRu;
+      const vEn = formData.get(`specEn${i}Value`)?.toString().trim() || vRu;
+      const pCn = formData.get(`specCn${i}Param`)?.toString().trim() || pRu;
+      const vCn = formData.get(`specCn${i}Value`)?.toString().trim() || vRu;
+
+      if (pRu || vRu) {
+        specs.push({
+          param: { ru: pRu || "", en: pEn || "", cn: pCn || "" },
+          value: { ru: vRu || "", en: vEn || "", cn: vCn || "" }
+        });
+      }
+    }
+
+    const additionalImages: string[] = [];
+    const schemeDir = path.join(process.cwd(), "public", "products", "scheme");
+    await fs.mkdir(schemeDir, { recursive: true });
+
+    for (let i = 1; i <= extraImgCount; i++) {
+      const extraFile = formData.get(`extraImg${i}`) as File | null;
+      if (extraFile && extraFile.size > 0) {
+        const ext = extraFile.name.split(".").pop() || "jpg";
+        const extraName = `scheme-${customFileName}-${i}.${ext}`;
+        const buffer = Buffer.from(await extraFile.arrayBuffer());
+        await fs.writeFile(path.join(schemeDir, extraName), buffer);
+        additionalImages.push(extraName);
+      }
+    }
+
+    const visibleCount = await prisma.product.count({ where: { isHidden: false } });
+
+    await prisma.product.create({
+      data: {
+        ex,
+        image: imageName,
+        title: {
+          ru: formData.get("titleRu")?.toString().trim() || "",
+          en: formData.get("titleEn")?.toString().trim() || "",
+          cn: formData.get("titleCn")?.toString().trim() || "",
+        },
+        shortDesc: {
+          ru: formData.get("descRu")?.toString().trim() || "",
+          en: formData.get("descEn")?.toString().trim() || "",
+          cn: formData.get("descCn")?.toString().trim() || "",
+        },
+        applications: { ru: appsRu, en: appsEn, cn: appsCn },
+        specifications: specs,
+        additionalImages,
+        isHidden: false,
+        order: visibleCount + 1,
+      },
+    });
+
+    await reindexVisibleProducts();
+
+    revalidatePath("/products");
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("Ошибка создания товара:", error);
+    throw error;
+  }
+}
+
+// Редактирование товара
+export async function updateProduct(formData: FormData) {
+  try {
+    const id = formData.get("productId")?.toString();
+    if (!id) throw new Error("ID товара не указан");
+
+    const existingProduct = await prisma.product.findUnique({ where: { id } });
+    if (!existingProduct) throw new Error("Товар не найден");
+
+    const customFileName = formData.get("customFileName")?.toString().trim() || existingProduct.image.replace(/\.[^/.]+$/, "");
+    const ex = formData.get("ex")?.toString().trim() || existingProduct.ex || "Ex ia I Ma";
+    const imageFile = formData.get("image") as File | null;
+
+    let imageName = existingProduct.image;
+    if (imageFile && imageFile.size > 0) {
+      const ext = imageFile.name.split(".").pop() || "jpg";
+      imageName = `${customFileName}.${ext}`;
+      const uploadDir = path.join(process.cwd(), "public", "products");
+      await fs.mkdir(uploadDir, { recursive: true });
+      const buffer = Buffer.from(await imageFile.arrayBuffer());
+      await fs.writeFile(path.join(uploadDir, imageName), buffer);
+    }
+
+    const appCount = parseInt(formData.get("appCount")?.toString() || "3");
+    const specCount = parseInt(formData.get("specCount")?.toString() || "3");
+    const extraImgCount = parseInt(formData.get("extraImgCount")?.toString() || "0");
+
+    const appsRu: string[] = [];
+    const appsEn: string[] = [];
+    const appsCn: string[] = [];
+    for (let i = 1; i <= appCount; i++) {
+      const r = formData.get(`appRu${i}`)?.toString().trim();
+      const e = formData.get(`appEn${i}`)?.toString().trim();
+      const c = formData.get(`appCn${i}`)?.toString().trim();
+      if (r) appsRu.push(r);
+      if (e) appsEn.push(e);
+      if (c) appsCn.push(c);
+    }
+
+    const specs: any[] = [];
+    for (let i = 1; i <= specCount; i++) {
+      const pRu = formData.get(`specRu${i}Param`)?.toString().trim();
+      const vRu = formData.get(`specRu${i}Value`)?.toString().trim();
+      const pEn = formData.get(`specEn${i}Param`)?.toString().trim() || pRu;
+      const vEn = formData.get(`specEn${i}Value`)?.toString().trim() || vRu;
+      const pCn = formData.get(`specCn${i}Param`)?.toString().trim() || pRu;
+      const vCn = formData.get(`specCn${i}Value`)?.toString().trim() || vRu;
+
+      if (pRu || vRu) {
+        specs.push({
+          param: { ru: pRu || "", en: pEn || "", cn: pCn || "" },
+          value: { ru: vRu || "", en: vEn || "", cn: vCn || "" }
+        });
+      }
+    }
+
+    const additionalImages: string[] = [...(existingProduct.additionalImages || [])];
+    const schemeDir = path.join(process.cwd(), "public", "products", "scheme");
+    await fs.mkdir(schemeDir, { recursive: true });
+
+    for (let i = 1; i <= extraImgCount; i++) {
+      const extraFile = formData.get(`extraImg${i}`) as File | null;
+      if (extraFile && extraFile.size > 0) {
+        const ext = extraFile.name.split(".").pop() || "jpg";
+        const extraName = `scheme-${customFileName}-${Date.now()}-${i}.${ext}`;
+        const buffer = Buffer.from(await extraFile.arrayBuffer());
+        await fs.writeFile(path.join(schemeDir, extraName), buffer);
+        additionalImages.push(extraName);
+      }
+    }
+
+    await prisma.product.update({
+      where: { id },
+      data: {
+        ex,
+        image: imageName,
+        title: {
+          ru: formData.get("titleRu")?.toString().trim() || "",
+          en: formData.get("titleEn")?.toString().trim() || "",
+          cn: formData.get("titleCn")?.toString().trim() || "",
+        },
+        shortDesc: {
+          ru: formData.get("descRu")?.toString().trim() || "",
+          en: formData.get("descEn")?.toString().trim() || "",
+          cn: formData.get("descCn")?.toString().trim() || "",
+        },
+        applications: { ru: appsRu, en: appsEn, cn: appsCn },
+        specifications: specs,
+        additionalImages,
+      },
+    });
+
+    revalidatePath("/products");
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("Ошибка обновления товара:", error);
+    throw error;
   }
 }

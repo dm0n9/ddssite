@@ -17,7 +17,7 @@ export default function SystemsClient({ initialDbSystems, isAdmin }: { initialDb
   const [isSaving, setIsSaving] = useState(false); 
   const [editingSystem, setEditingSystem] = useState<any | null>(null);
 
-  // Стейты из CatalogClient для управления формой и предпросмотром
+  // Стейты для управления формой и предпросмотром
   const [appCount, setAppCount] = useState(3);
   const [specCount, setSpecCount] = useState(3);
   const [extraImgCount, setExtraImgCount] = useState(0);
@@ -113,7 +113,7 @@ export default function SystemsClient({ initialDbSystems, isAdmin }: { initialDb
 
   const handleOrderChange = (id: string, newOrder: number) => {
     startTransition(async () => {
-      await updateSingleSystemOrder(id, newOrder);
+      await updateSingleSystemOrder(id, newOrder || 1);
       router.refresh();
     });
   };
@@ -124,7 +124,7 @@ export default function SystemsClient({ initialDbSystems, isAdmin }: { initialDb
     try {
       const formData = new FormData(e.currentTarget);
       if (editingSystem) {
-        formData.append("productId", editingSystem.id); // Сохраняем имя ключа productId, как в вашем экшене
+        formData.append("productId", editingSystem.id);
         await updateSystem(formData);
       } else {
         await addSystem(formData);
@@ -146,22 +146,35 @@ export default function SystemsClient({ initialDbSystems, isAdmin }: { initialDb
   return (
     <main className={styles.main_layout}>
       
-      {/* КНОПКИ АДМИНА */}
+      {/* ВЕРХНЯЯ ПАНЕЛЬ АДМИНИСТРАТОРА */}
       {isAdmin && (
         <div className={styles.container} style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "15px 20px" }}>
-          <button onClick={() => startTransition(async () => { await logoutAdmin(); router.refresh(); })} className="px-5 py-2.5 bg-white border border-gray-300 rounded text-gray-700">Выйти</button>
+          <button 
+            onClick={() => {
+              startTransition(async () => {
+                await logoutAdmin();
+                router.refresh();
+              });
+            }}
+            disabled={isPending}
+            className="px-5 py-2.5 rounded-md font-bold transition-all shadow-sm text-sm border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+          >
+            Выйти
+          </button>
+
           <button 
             onClick={() => {
               setIsPanelOpen(!isPanelOpen);
-              if (!isPanelOpen && !editingSystem) { 
-                setAppCount(3); setSpecCount(3); setExtraImgCount(0); 
+              if (isPanelOpen) {
+                setEditingSystem(null);
+                setPreviewData({ title: "", desc: "", imageUrl: "", apps: [], specs: [], extraImages: {} });
               }
             }}
-            className="px-6 py-2.5 rounded font-bold"
+            className="px-6 py-2.5 rounded-md font-bold transition-all shadow-sm text-sm border transition-colors"
             style={{ 
               background: isPanelOpen ? "#fff" : "#0284c7", 
               color: isPanelOpen ? "#ef4444" : "#fff",
-              border: `1px solid ${isPanelOpen ? "#ef4444" : "#0284c7"}`
+              borderColor: isPanelOpen ? "#ef4444" : "#0284c7"
             }}
           >
             {isPanelOpen ? "Закрыть панель" : "Добавить систему"}
@@ -448,8 +461,11 @@ export default function SystemsClient({ initialDbSystems, isAdmin }: { initialDb
                   <div className="flex items-center gap-2 mt-1 w-full bg-white/95 backdrop-blur-sm border border-gray-200 rounded-md p-1 shadow-md">
                     <span className="text-[9px] uppercase font-bold text-gray-500 pl-1.5 whitespace-nowrap">Порядок:</span>
                     <input 
-                      type="number" defaultValue={item.order} min="1"
-                      onBlur={(e) => handleOrderChange(item.id, parseInt(e.target.value))}
+                      key={`order-${item.id}-${item.order}`}
+                      type="number" 
+                      defaultValue={item.order && item.order > 0 ? item.order : 1} 
+                      min="1"
+                      onBlur={(e) => handleOrderChange(item.id, parseInt(e.target.value) || 1)}
                       onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
                       className="w-full text-center text-xs font-bold border border-gray-300 rounded focus:border-blue-500 outline-none py-1 mr-0.5"
                     />
@@ -458,7 +474,11 @@ export default function SystemsClient({ initialDbSystems, isAdmin }: { initialDb
               )}
 
               <div className={styles.image_container}>
-                <img src={`/systems/${item.image}`} alt={item.title[currentLang] || item.title.ru} className={styles.system_img} />
+                <img 
+                  src={item.image?.startsWith('http') || item.image?.startsWith('/') ? item.image : `/systems/${item.image}`} 
+                  alt={item.title[currentLang] || item.title.ru} 
+                  className={styles.system_img} 
+                />
               </div>
 
               <div className={styles.info_block}>

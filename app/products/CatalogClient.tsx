@@ -77,7 +77,6 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
   };
 
   const allProducts = initialDbProducts;
-  const visibleProducts = allProducts.filter(p => isAdmin ? true : !p.isHidden);
 
   useEffect(() => {
     const productId = searchParams.get("product");
@@ -89,19 +88,38 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
     }
   }, [searchParams, allProducts.length]);
 
-  const handleShare = (productId: string) => {
+  const handleShare = async (productId: string) => {
     const shareUrl = `${window.location.origin}${window.location.pathname}?product=${productId}`;
-    navigator.clipboard.writeText(shareUrl).then(() => {
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = shareUrl;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        const successful = document.execCommand("copy");
+        textArea.remove();
+        if (!successful) throw new Error("execCommand copy returned false");
+      }
+
       setCopiedId(productId);
       setTimeout(() => setCopiedId(null), 2000);
-    });
+    } catch (err) {
+      console.error("Ошибка при копировании ссылки:", err);
+      prompt("Скопируйте ссылку на товар:", shareUrl);
+    }
   };
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setAppCount(Math.max(3, product.specs?.ru?.length || 3));
     
-    // Определяем длину характеристик (из specifications или старой table)
     const specsSource = product.specifications || product.table || [];
     setSpecCount(Math.max(3, specsSource.length));
     setExtraImgCount(product.additionalImages?.length || 0);
@@ -137,7 +155,7 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
 
   const handleOrderChange = (id: string, newOrder: number) => {
     startTransition(async () => {
-      await updateSingleProductOrder(id, newOrder);
+      await updateSingleProductOrder(id, newOrder || 1);
       router.refresh();
     });
   };
@@ -226,26 +244,29 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
 
   return (
     <main className={styles.main_layout}>
-      {/* ПАНЕЛЬ КНОПОК АДМИНА */}
+      {/* ЕДИНАЯ ПАНЕЛЬ КНОПОК АДМИНА */}
       {isAdmin && (
         <div className={styles.container} style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "15px 20px" }}>
-          
           <button 
             onClick={handleLogout}
             disabled={isPending}
-            className="px-5 py-2.5 rounded-md font-bold transition-all shadow-sm text-sm border border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
+            className="px-5 py-2.5 rounded-md font-bold transition-all shadow-sm text-sm border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50"
           >
-             Выйти
+            Выйти
           </button>
 
           <button 
             onClick={() => {
               setIsPanelOpen(!isPanelOpen);
-              if (!isPanelOpen && !editingProduct) { 
-                setAppCount(3); setSpecCount(3); setExtraImgCount(0); 
+              if (isPanelOpen) { 
+                setEditingProduct(null);
+                setAppCount(3); 
+                setSpecCount(3); 
+                setExtraImgCount(0); 
+                setPreviewData({ title: "", desc: "", imageUrl: "", apps: [], specs: [], extraImages: {} });
               }
             }}
-            className="px-6 py-2.5 rounded-md font-bold transition-all shadow-sm text-sm border"
+            className="px-6 py-2.5 rounded-md font-bold transition-all shadow-sm text-sm border transition-colors"
             style={{ 
               background: isPanelOpen ? "#fff" : "#0284c7", 
               color: isPanelOpen ? "#ef4444" : "#fff",
@@ -617,7 +638,10 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                   return (
                     <div key={p.id} className={`${styles.product_card} relative opacity-60 bg-gray-50`}>
                       <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
-                        <button onClick={() => handleToggleVisibility(p.id, !!p.isHidden)} className="bg-white border border-emerald-200 text-emerald-700 px-3 py-1.5 rounded-md text-[11px] font-black uppercase tracking-wider hover:bg-emerald-50 shadow-md">
+                        <button onClick={(e) => { e.stopPropagation(); handleEdit(p); }} className="bg-white border border-blue-200 text-blue-600 px-3 py-1.5 rounded-md text-[11px] font-black uppercase tracking-wider hover:bg-blue-50 shadow-md">
+                          Изменить
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); handleToggleVisibility(p.id, !!p.isHidden); }} className="bg-white border border-emerald-200 text-emerald-700 px-3 py-1.5 rounded-md text-[11px] font-black uppercase tracking-wider hover:bg-emerald-50 shadow-md">
                           Показать
                         </button>
                       </div>
@@ -680,7 +704,7 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                 </div>
               </div>
 
-              {/* ТЕХНИЧЕСКИЕ ХАРАКТЕРИСТИКИ (поддерживает specifications и table) */}
+              {/* ТЕХНИЧЕСКИЕ ХАРАКТЕРИСТИКИ */}
               {((selectedProduct.specifications && selectedProduct.specifications.length > 0) || (selectedProduct.table && selectedProduct.table.length > 0)) && (
                 <div className={styles.modal_table_zone}>
                   <h4 className={styles.table_section_title}>{uiTexts.table_title[currentLang]}</h4>

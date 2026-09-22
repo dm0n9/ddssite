@@ -25,7 +25,6 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
   const [isPending, startTransition] = useTransition();
   const [editingDoc, setEditingDoc] = useState<Doc | null>(null);
 
-  // Перенесли заголовок страницы сюда, чтобы полностью избавиться от файла lang.ts
   const uiTexts = {
     docs_page_title: { 
       ru: "Техническая документация и сертификаты Девис Дерби Сибирь", 
@@ -39,7 +38,6 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
     tab_catalogs: { ru: "Каталоги", en: "Catalogs", cn: "产品目录" }
   };
   
-  // Теперь берем документы ИСКЛЮЧИТЕЛЬНО из базы данных (initialDbDocs)
   const filteredDocs = initialDbDocs.filter((doc) => {
     if (!isAdmin && doc.isHidden) return false;
     if (activeCategory === "all") return true;
@@ -73,27 +71,42 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleLogout = () => {
+    startTransition(async () => {
+      await logoutAdmin();
+      router.refresh();
+    });
+  };
+
   const twInput = "w-full border border-gray-300 rounded-md p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-1 outline-none bg-white placeholder-gray-400";
   const twLabel = "block text-sm font-semibold text-gray-700 mb-1.5";
 
   return (
     <main className={styles.main_layout}>
-      {/* ПАНЕЛЬ АДМИНА */}
+      {/* ЕДИНАЯ ПАНЕЛЬ АДМИНИСТРАТОРА */}
       {isAdmin && (
-        <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", justifyContent: "flex-end", gap: "10px", padding: "15px 20px" }}>
-          <button onClick={() => startTransition(() => { logoutAdmin(); router.refresh(); })} className="px-5 py-2.5 rounded-md font-bold text-sm border border-gray-300 bg-white text-gray-700 hover:bg-gray-100">
-            🚪 Выйти
-          </button>
+        <div className={styles.container} style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "15px 20px" }}>
           <button 
-            onClick={() => { setIsPanelOpen(!isPanelOpen); if (!isPanelOpen) setEditingDoc(null); }}
-            className="px-6 py-2.5 rounded-md font-bold text-sm text-white border"
+            onClick={handleLogout}
+            disabled={isPending}
+            className="px-5 py-2.5 rounded-md font-bold transition-all shadow-sm text-sm border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+          >
+            Выйти
+          </button>
+
+          <button 
+            onClick={() => { 
+              setIsPanelOpen(!isPanelOpen); 
+              if (isPanelOpen) setEditingDoc(null); 
+            }}
+            className="px-6 py-2.5 rounded-md font-bold transition-all shadow-sm text-sm border transition-colors"
             style={{ 
               background: isPanelOpen ? "#fff" : "#0284c7", 
               color: isPanelOpen ? "#ef4444" : "#fff",
               borderColor: isPanelOpen ? "#ef4444" : "#0284c7" 
             }}
           >
-            {isPanelOpen ? "✕ Закрыть панель" : "+ Добавить документ"}
+            {isPanelOpen ? "Закрыть панель" : "Добавить документ"}
           </button>
         </div>
       )}
@@ -142,18 +155,30 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
               <button type="submit" disabled={isSaving} className="w-full bg-[#22c55e] text-white font-medium py-3 px-4 rounded-md hover:bg-green-600 transition-colors disabled:bg-gray-400">
                 {isSaving ? "Сохранение..." : editingDoc ? "Сохранить изменения" : "Загрузить документ"}
               </button>
+              {editingDoc && (
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setEditingDoc(null);
+                    setIsPanelOpen(false);
+                  }}
+                  className="w-full bg-gray-100 text-gray-700 font-medium py-3 px-4 rounded-md hover:bg-gray-200 transition-colors text-sm"
+                >
+                  Отменить редактирование
+                </button>
+              )}
             </div>
           </form>
         </div>
       )}
 
-      {/* Основной контент */}
+      {/* ОСНОВНОЙ КОНТЕНТ */}
       <section className={styles.container} style={{ paddingTop: "40px", paddingBottom: "60px" }}>
         <h1 className={styles.main_title} style={{ margin: "0 0 30px 0" }}>
           {uiTexts.docs_page_title[currentLang]}
         </h1>
 
-        {/* Переключатели */}
+        {/* Переключатели категорий */}
         <div className={styles.docs_tabs}>
           <button className={`${styles.tab_filter} ${activeCategory === "all" ? styles.tab_filter_active : ""}`} onClick={() => setActiveCategory("all")}>
             {uiTexts.tab_all[currentLang]}
@@ -169,27 +194,46 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
           </button>
         </div>
 
-        {/* Список файлов */}
+        {/* Список документов */}
         <div className={styles.docs_list_container}>
           {filteredDocs.map((doc) => {
             return (
-              <div key={doc.id} className={`${styles.doc_row_item} relative`} style={{ opacity: doc.isHidden ? 0.5 : 1 }}>
+              <div 
+                key={doc.id} 
+                className={`${styles.doc_row_item} relative`} 
+                style={{ 
+                  paddingTop: isAdmin ? "46px" : undefined, 
+                  opacity: doc.isHidden ? 0.6 : 1 
+                }}
+              >
                 
-                {/* Панель управления (убрали проверку isDbDoc, т.к. теперь всё из БД) */}
+                {/* Панель админа над строкой документа */}
                 {isAdmin && (
-                  <div className="absolute top-2 left-2 z-20 flex gap-2">
-                    <button onClick={() => handleEdit(doc)} className="bg-white border border-blue-200 text-blue-600 px-2 py-1 rounded text-[10px] font-bold uppercase shadow-sm">✏️ Изменить</button>
-                    <button onClick={() => startTransition(() => { toggleDocVisibility(doc.id, !doc.isHidden); router.refresh(); })} className="bg-white border border-gray-200 text-gray-600 px-2 py-1 rounded text-[10px] font-bold uppercase shadow-sm">
-                      {doc.isHidden ? "👁️ Показать" : "🚫 Скрыть"}
+                  <div className="absolute top-2.5 left-4 z-20 flex items-center gap-2">
+                    <button 
+                      onClick={() => handleEdit(doc)} 
+                      className="bg-white/95 backdrop-blur-sm border border-blue-200 text-blue-600 px-3 py-1 rounded-md text-[11px] font-black uppercase tracking-wider hover:bg-blue-50 shadow-sm transition-all"
+                    >
+                      Изменить
                     </button>
-                    <div className="flex items-center gap-1 bg-white border border-gray-200 rounded px-1.5 shadow-sm">
-                      <span className="text-[9px] uppercase font-bold text-gray-500">Порядок:</span>
+                    
+                    <button 
+                      onClick={() => startTransition(() => { toggleDocVisibility(doc.id, !doc.isHidden); router.refresh(); })} 
+                      className="bg-white/95 backdrop-blur-sm border border-gray-200 text-gray-600 px-3 py-1 rounded-md text-[11px] font-black uppercase tracking-wider hover:bg-gray-50 shadow-sm transition-all"
+                    >
+                      {doc.isHidden ? "Показать" : "Скрыть"}
+                    </button>
+                    
+                    <div className="flex items-center gap-1.5 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-md px-2 py-0.5 shadow-sm">
+                      <span className="text-[10px] uppercase font-bold text-gray-500 whitespace-nowrap">Порядок:</span>
                       <input 
                         key={`order-${doc.id}-${doc.order}`}
-                        type="number" min="1" defaultValue={doc.order || 1}
+                        type="number" 
+                        min="1" 
+                        defaultValue={doc.order || 1}
                         onBlur={(e) => startTransition(() => { updateDocOrder(doc.id, parseInt(e.target.value) || 1); router.refresh(); })}
                         onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
-                        className="w-10 text-center text-xs font-bold border border-gray-300 rounded outline-none py-0.5"
+                        className="w-12 text-center text-xs font-bold border border-gray-300 rounded focus:border-blue-500 outline-none py-0.5"
                       />
                     </div>
                   </div>
@@ -206,7 +250,12 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
                   <span className={styles.doc_item_size}>{doc.size}</span>
                 </div>
 
-                <a href={`/docs/${doc.file}`} download className={styles.btn_download_file}>
+                <a 
+                  href={`/docs/${doc.file}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className={styles.btn_download_file}
+                >
                   <span>{uiTexts.btn_download[currentLang]}</span>
                   <span style={{ fontSize: "16px" }}>⬇</span>
                 </a>
