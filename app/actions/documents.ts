@@ -1,137 +1,192 @@
 "use server";
+
 import { prisma } from "../lib/db";
 import { revalidatePath } from "next/cache";
 import fs from "fs/promises";
 import path from "path";
-import { cookies } from "next/headers";
 
-// Автоматический подсчет веса файла
-function formatBytes(bytes: number) {
-  if (!+bytes) return '0 Байт';
-  const k = 1024;
-  const sizes = ['Байт', 'Кб', 'Мб', 'Гб'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+// Форматирование размера файла
+function formatFileSize(bytes: number): string {
+  if (bytes >= 1024 * 1024) {
+    return `${(bytes / (1024 * 1024)).toFixed(1)} Мб`;
+  }
+  return `${Math.round(bytes / 1024)} Кб`;
 }
 
-export async function addDocument(formData: FormData) {
-  try {
-    const cookieStore = await cookies();
-    if (cookieStore.get("admin_session")?.value !== "authenticated") return;
+// Автоматическая непрерывная перенумерация документов 1, 2, 3...
+async function reindexVisibleDocs() {
+  const visibleDocs = await prisma.document.findMany({
+    where: { isHidden: false },
+    orderBy: [
+      { order: "asc" },
+      { createdAt: "desc" }
+    ],
+  });
 
-    const titleRu = formData.get("titleRu")?.toString() || "Новый документ";
-    const titleEn = formData.get("titleEn")?.toString() || titleRu;
-    const titleCn = formData.get("titleCn")?.toString() || titleRu;
-    const category = formData.get("category")?.toString() || "manual";
+  const updates = visibleDocs.map((item, index) =>
+    prisma.document.update({
+      where: { id: item.id },
+      data: { order: index + 1 },
+    })
+  );
 
-    const docsDir = path.join(process.cwd(), "public", "docs");
-    await fs.mkdir(docsDir, { recursive: true }).catch(() => {});
-
-    const file = formData.get("file") as File | null;
-    if (!file || file.size === 0) throw new Error("Файл не загружен");
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const shortId = Math.random().toString(36).substring(2, 6);
-    const fileName = `doc-${shortId}-${file.name.replace(/[^a-z0-9.-]/gi, '_')}`;
-    await fs.writeFile(path.join(docsDir, fileName), buffer);
-
-    const fileSizeStr = formatBytes(file.size);
-
-    const lastDoc = await prisma.document.findFirst({ orderBy: { order: 'desc' } });
-    const newOrder = lastDoc ? lastDoc.order + 1 : 1;
-
-    await prisma.document.create({
-      data: {
-        title: { ru: titleRu, en: titleEn, cn: titleCn },
-        category,
-        file: fileName,
-        size: fileSizeStr,
-        order: newOrder,
-        isHidden: false,
-      }
-    });
-    revalidatePath("/docs");
-  } catch (error) {
-    console.error("Ошибка добавления:", error);
+  if (updates.length > 0) {
+    await prisma.$transaction(updates);
   }
 }
 
-export async function updateDocument(formData: FormData) {
+// Переключение видимости документа
+export async function toggleDocVisibility(id: string, isHidden: boolean) {
   try {
-    const cookieStore = await cookies();
-    if (cookieStore.get("admin_session")?.value !== "authenticated") return;
+    await prisma.document.update({
+      where: { id },
+      data: {
+        isHidden,
+        order: isHidden ? 0 : 9999,
+      },
+    });
 
-    const id = formData.get("id")?.toString();
-    if (!id) return;
+    await reindexVisibleDocs();
 
-    const existingDoc = await prisma.document.findUnique({ where: { id } });
-    if (!existingDoc) return;
+    revalidatePath("/docs");
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("Ошибка переключения видимости документа:", error);
+    throw error;
+  }
+}
 
-    const titleRu = formData.get("titleRu")?.toString() || (existingDoc.title as any)?.ru;
-    const titleEn = formData.get("titleEn")?.toString() || (existingDoc.title as any)?.en;
-    const titleCn = formData.get("titleCn")?.toString() || (existingDoc.title as any)?.cn;
-    const category = formData.get("category")?.toString() || existingDoc.category;
+// Ручное изменение порядка документа
+export async function updateDocOrder(id: string, targetOrder: number) {
+  try {
+    const visibleDocs = await prisma.document.findMany({
+      where: { isHidden: false },
+      orderBy: [
+        { order: "asc" },
+        { createdAt: "desc" }
+      ],
+    });
+
+    const targetDoc = visibleDocs.find((d) => d.id === id);
+    if (!targetDoc) return { success: false };
+
+    const filtered = visibleDocs.filter((d) => d.id !== id);
+    const newIndex = Math.max(0, Math.min(targetOrder - 1, filtered.length));
+    filtered.splice(newIndex, 0, targetDoc);
+
+    const reorderQueries = filtered.map((item, index) =>
+      prisma.document.update({
+        where: { id: item.id },
+        data: { order: index + 1 },
+      })
+    );
+
+    await prisma.$transaction(reorderQueries);
+
+    revalidatePath("/docs");
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("Ошибка при обновлении порядка документа:", error);
+    throw error;
+  }
+}
+
+// Добавление документа
+export async function addDocument(formData: FormData) {
+  try {
+    const file = formData.get("file") as File | null;
+    if (!file || file.size === 0) throw new Error("Файл не выбран");
+
+    const category = formData.get("category")?.toString() || "manual";
+    const titleRu = formData.get("titleRu")?.toString().trim() || "";
+    const titleEn = formData.get("titleEn")?.toString().trim() || "";
+    const titleCn = formData.get("titleCn")?.toString().trim() || "";
 
     const docsDir = path.join(process.cwd(), "public", "docs");
-    await fs.mkdir(docsDir, { recursive: true }).catch(() => {});
+    await fs.mkdir(docsDir, { recursive: true });
+
+    const fileName = file.name;
+    const buffer = Buffer.from(await file.arrayBuffer());
+    await fs.writeFile(path.join(docsDir, fileName), buffer);
+
+    const sizeFormatted = formatFileSize(file.size);
+    const visibleCount = await prisma.document.count({ where: { isHidden: false } });
+
+    await prisma.document.create({
+      data: {
+        category,
+        file: fileName,
+        size: sizeFormatted,
+        title: {
+          ru: titleRu,
+          en: titleEn,
+          cn: titleCn,
+        },
+        isHidden: false,
+        order: visibleCount + 1,
+      },
+    });
+
+    await reindexVisibleDocs();
+
+    revalidatePath("/docs");
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("Ошибка загрузки документа:", error);
+    throw error;
+  }
+}
+
+// Обновление документа
+export async function updateDocument(formData: FormData) {
+  try {
+    const id = formData.get("id")?.toString();
+    if (!id) throw new Error("ID документа не указан");
+
+    const existing = await prisma.document.findUnique({ where: { id } });
+    if (!existing) throw new Error("Документ не найден");
+
+    const category = formData.get("category")?.toString() || existing.category;
+    const titleRu = formData.get("titleRu")?.toString().trim() || "";
+    const titleEn = formData.get("titleEn")?.toString().trim() || "";
+    const titleCn = formData.get("titleCn")?.toString().trim() || "";
+
+    let fileName = existing.file;
+    let sizeFormatted = existing.size;
 
     const file = formData.get("file") as File | null;
-    let fileName = existingDoc.file;
-    let fileSizeStr = existingDoc.size;
-
     if (file && file.size > 0) {
+      const docsDir = path.join(process.cwd(), "public", "docs");
+      await fs.mkdir(docsDir, { recursive: true });
+
+      fileName = file.name;
       const buffer = Buffer.from(await file.arrayBuffer());
-      const shortId = Math.random().toString(36).substring(2, 6);
-      fileName = `doc-${shortId}-${file.name.replace(/[^a-z0-9.-]/gi, '_')}`;
       await fs.writeFile(path.join(docsDir, fileName), buffer);
-      fileSizeStr = formatBytes(file.size);
+      sizeFormatted = formatFileSize(file.size);
     }
 
     await prisma.document.update({
       where: { id },
       data: {
-        title: { ru: titleRu, en: titleEn, cn: titleCn },
         category,
         file: fileName,
-        size: fileSizeStr,
-      }
+        size: sizeFormatted,
+        title: {
+          ru: titleRu,
+          en: titleEn,
+          cn: titleCn,
+        },
+      },
     });
+
     revalidatePath("/docs");
+    revalidatePath("/");
+    return { success: true };
   } catch (error) {
-    console.error("Ошибка обновления:", error);
+    console.error("Ошибка обновления документа:", error);
+    throw error;
   }
-}
-
-export async function toggleDocVisibility(id: string, isHidden: boolean) {
-  try {
-    const cookieStore = await cookies();
-    if (cookieStore.get("admin_session")?.value !== "authenticated") return;
-    await prisma.document.update({ where: { id }, data: { isHidden } });
-    revalidatePath("/docs");
-  } catch (error) {}
-}
-
-export async function updateDocOrder(id: string, requestedOrder: number) {
-  try {
-    const cookieStore = await cookies();
-    if (cookieStore.get("admin_session")?.value !== "authenticated") return;
-
-    const docs = await prisma.document.findMany({ orderBy: [{ order: 'asc' }, { createdAt: 'desc' }] });
-    const currentIndex = docs.findIndex(d => d.id === id);
-    if (currentIndex === -1) return;
-
-    let targetIndex = requestedOrder - 1;
-    if (targetIndex < 0) targetIndex = 0;
-    if (targetIndex >= docs.length) targetIndex = docs.length - 1;
-
-    const [movedDoc] = docs.splice(currentIndex, 1);
-    docs.splice(targetIndex, 0, movedDoc);
-
-    const updates = docs.map((d: any, index: number) => 
-      prisma.document.update({ where: { id: d.id }, data: { order: index + 1 } })
-    );
-
-    await prisma.$transaction(updates);
-    revalidatePath("/docs");
-  } catch (error) {}
 }
