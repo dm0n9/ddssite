@@ -93,7 +93,7 @@ export const homePageTexts = {
         imgWidth: 110,
         imgHeight: 180,
         title: { ru: "Газоанализатор", en: "Gas Analyzer", cn: "气体分析仪" },
-        link: "http://localhost:3000/products?product=sga"
+        link: "/products?product=sga"
       },
       {
         id: "tablet",
@@ -101,7 +101,7 @@ export const homePageTexts = {
         imgWidth: 170,
         imgHeight: 180,
         title: { ru: "Планшет", en: "Tablet", cn: "平板电脑" },
-        link: "http://localhost:3000/products?product=tablet"
+        link: "/products?product=tablet"
       },
       {
         id: "flowmeter",
@@ -109,19 +109,19 @@ export const homePageTexts = {
         imgWidth: 170,
         imgHeight: 180,
         title: { ru: "Расходометр", en: "Flowmeter", cn: "流量计" },
-        link: "http://localhost:3000/products?product=flowmeter"
+        link: "/products?product=flowmeter"
       },
       {
         id: "shep-01",
         img: "/products/shep_01.png",
         title: { ru: "ШЭП-01", en: "SHEP-01", cn: "SHEP-01" },
-        link: "http://localhost:3000/products?product=shep-01"
+        link: "/products?product=shep-01"
       },
       {
         id: "wipan",
         img: "/products/wipan_1.jpg",
         title: { ru: "WiPAN", en: "WiPAN", cn: "WiPAN" },
-        link: "http://localhost:3000/products?product=wipan"
+        link: "/products?product=wipan"
       }
     ]
   },
