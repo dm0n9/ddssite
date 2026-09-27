@@ -93,25 +93,36 @@ export async function updateDocOrder(id: string, targetOrder: number) {
   }
 }
 
-// Добавление документа
+// Добавление документа или внешней ссылки
 export async function addDocument(formData: FormData) {
   try {
+    const externalUrl = formData.get("externalUrl")?.toString().trim();
     const file = formData.get("file") as File | null;
-    if (!file || file.size === 0) throw new Error("Файл не выбран");
+
+    let fileName = "";
+    let sizeFormatted = "";
+
+    // Проверяем: это внешняя ссылка или локальный PDF
+    if (externalUrl && /^https?:\/\//i.test(externalUrl)) {
+      fileName = externalUrl;
+      sizeFormatted = "Внешний ресурс";
+    } else if (file && file.size > 0) {
+      const docsDir = path.join(process.cwd(), "public", "docs");
+      await fs.mkdir(docsDir, { recursive: true });
+
+      fileName = file.name;
+      const buffer = Buffer.from(await file.arrayBuffer());
+      await fs.writeFile(path.join(docsDir, fileName), buffer);
+      sizeFormatted = formatFileSize(file.size);
+    } else {
+      throw new Error("Необходимо либо загрузить PDF файл, либо ввести внешнюю ссылку");
+    }
 
     const category = formData.get("category")?.toString() || "manual";
     const titleRu = formData.get("titleRu")?.toString().trim() || "";
-    const titleEn = formData.get("titleEn")?.toString().trim() || "";
-    const titleCn = formData.get("titleCn")?.toString().trim() || "";
+    const titleEn = formData.get("titleEn")?.toString().trim() || titleRu;
+    const titleCn = formData.get("titleCn")?.toString().trim() || titleRu;
 
-    const docsDir = path.join(process.cwd(), "public", "docs");
-    await fs.mkdir(docsDir, { recursive: true });
-
-    const fileName = file.name;
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await fs.writeFile(path.join(docsDir, fileName), buffer);
-
-    const sizeFormatted = formatFileSize(file.size);
     const visibleCount = await prisma.document.count({ where: { isHidden: false } });
 
     await prisma.document.create({
@@ -140,7 +151,7 @@ export async function addDocument(formData: FormData) {
   }
 }
 
-// Обновление документа
+// Обновление документа или ссылки
 export async function updateDocument(formData: FormData) {
   try {
     const id = formData.get("id")?.toString();
@@ -149,16 +160,16 @@ export async function updateDocument(formData: FormData) {
     const existing = await prisma.document.findUnique({ where: { id } });
     if (!existing) throw new Error("Документ не найден");
 
-    const category = formData.get("category")?.toString() || existing.category;
-    const titleRu = formData.get("titleRu")?.toString().trim() || "";
-    const titleEn = formData.get("titleEn")?.toString().trim() || "";
-    const titleCn = formData.get("titleCn")?.toString().trim() || "";
+    const externalUrl = formData.get("externalUrl")?.toString().trim();
+    const file = formData.get("file") as File | null;
 
     let fileName = existing.file;
     let sizeFormatted = existing.size;
 
-    const file = formData.get("file") as File | null;
-    if (file && file.size > 0) {
+    if (externalUrl && /^https?:\/\//i.test(externalUrl)) {
+      fileName = externalUrl;
+      sizeFormatted = "Внешний ресурс";
+    } else if (file && file.size > 0) {
       const docsDir = path.join(process.cwd(), "public", "docs");
       await fs.mkdir(docsDir, { recursive: true });
 
@@ -167,6 +178,11 @@ export async function updateDocument(formData: FormData) {
       await fs.writeFile(path.join(docsDir, fileName), buffer);
       sizeFormatted = formatFileSize(file.size);
     }
+
+    const category = formData.get("category")?.toString() || existing.category;
+    const titleRu = formData.get("titleRu")?.toString().trim() || "";
+    const titleEn = formData.get("titleEn")?.toString().trim() || titleRu;
+    const titleCn = formData.get("titleCn")?.toString().trim() || titleRu;
 
     await prisma.document.update({
       where: { id },

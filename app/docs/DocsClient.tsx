@@ -32,6 +32,8 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
       cn: "戴维斯德比西伯利亚技术文档与认证证书" 
     },
     btn_download: { ru: "Скачать PDF", en: "Download PDF", cn: "下载 PDF" },
+    btn_open: { ru: "Перейти на сайт", en: "Visit Website", cn: "访问网页" },
+    external_resource: { ru: "Внешний ресурс", en: "External Link", cn: "外部链接" },
     tab_all: { ru: "Все документы", en: "All Docs", cn: "所有文档" },
     tab_certs: { ru: "Сертификаты ТР ТС", en: "Certificates", cn: "认证证书" },
     tab_manuals: { ru: "Руководства и паспорта", en: "Manuals & Passports", cn: "操作手册" },
@@ -83,7 +85,7 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
 
   return (
     <main className={styles.main_layout}>
-      {/* ЕДИНАЯ ПАНЕЛЬ АДМИНИСТРАТОРА */}
+      {/* ПАНЕЛЬ АДМИНИСТРАТОРА */}
       {isAdmin && (
         <div className={styles.container} style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "15px 20px" }}>
           <button 
@@ -120,11 +122,11 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
             style={{ padding: "40px" }}
           >
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              {editingDoc ? "Редактирование документа" : "Загрузка нового документа"}
+              {editingDoc ? "Редактирование документа / ссылки" : "Загрузка нового документа / ссылки"}
             </h2>
 
             <div>
-              <label className={twLabel}>Категория документа</label>
+              <label className={twLabel}>Категория</label>
               <select name="category" defaultValue={editingDoc?.category || "manual"} className={twInput}>
                 <option value="certificate">Сертификаты ТР ТС</option>
                 <option value="manual">Руководства и паспорта</option>
@@ -133,9 +135,36 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
             </div>
 
             <div>
-              <label className={twLabel}>Файл (.pdf)</label>
-              <input type="file" name="file" accept=".pdf" required={!editingDoc} className="w-full border border-gray-300 rounded-md p-1.5 text-sm bg-white" />
-              {editingDoc && <p className="text-xs text-gray-500 mt-1">Текущий файл: {editingDoc.file}. Оставьте пустым, чтобы не менять.</p>}
+              <label className={twLabel}>Источник: локальный PDF-файл или Внешняя ссылка</label>
+              <div className="flex flex-col gap-2.5 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                <div>
+                  <span className="text-xs font-semibold text-gray-600 block mb-1">Вариант 1: Загрузить файл (.pdf)</span>
+                  <input type="file" name="file" accept=".pdf" className="w-full border border-gray-300 rounded-md p-1.5 text-sm bg-white" />
+                </div>
+
+                <div className="flex items-center gap-2 my-0.5">
+                  <div className="h-px bg-gray-300 flex-1"></div>
+                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">ИЛИ ВНЕШНИЙ САЙТ</span>
+                  <div className="h-px bg-gray-300 flex-1"></div>
+                </div>
+
+                <div>
+                  <span className="text-xs font-semibold text-gray-600 block mb-1">Вариант 2: Прямая ссылка (URL на госреестр, сайт и т.д.)</span>
+                  <input 
+                    type="url" 
+                    name="externalUrl" 
+                    placeholder="https://fgis.gost.ru/..." 
+                    defaultValue={editingDoc?.file?.startsWith("http") ? editingDoc.file : ""} 
+                    className={twInput} 
+                  />
+                </div>
+              </div>
+
+              {editingDoc && (
+                <p className="text-xs text-gray-500 mt-2">
+                  Текущий источник: <span className="font-semibold text-gray-800 break-all">{editingDoc.file}</span>
+                </p>
+              )}
             </div>
 
             <div>
@@ -172,13 +201,13 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
         </div>
       )}
 
-      {/* ОСНОВНОЙ КОНТЕНТ */}
+      {/* ОСНОВНОЙ СПИСОК */}
       <section className={styles.container} style={{ paddingTop: "40px", paddingBottom: "60px" }}>
         <h1 className={styles.main_title} style={{ margin: "0 0 30px 0" }}>
           {uiTexts.docs_page_title[currentLang]}
         </h1>
 
-        {/* Переключатели категорий */}
+        {/* Табы фильтров */}
         <div className={styles.docs_tabs}>
           <button className={`${styles.tab_filter} ${activeCategory === "all" ? styles.tab_filter_active : ""}`} onClick={() => setActiveCategory("all")}>
             {uiTexts.tab_all[currentLang]}
@@ -197,6 +226,9 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
         {/* Список документов */}
         <div className={styles.docs_list_container}>
           {filteredDocs.map((doc) => {
+            const isExternalUrl = /^https?:\/\//i.test(doc.file);
+            const targetHref = isExternalUrl ? doc.file : `/docs/${doc.file}`;
+
             return (
               <div 
                 key={doc.id} 
@@ -206,8 +238,7 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
                   opacity: doc.isHidden ? 0.6 : 1 
                 }}
               >
-                
-                {/* Панель админа над строкой документа */}
+                {/* Панель админа над строкой */}
                 {isAdmin && (
                   <div className="absolute top-2.5 left-4 z-20 flex items-center gap-2">
                     <button 
@@ -239,25 +270,35 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
                   </div>
                 )}
 
+                {/* Иконка PDF или WEB */}
                 <div className={styles.doc_icon_zone}>
-                  <span className={styles.pdf_label}>PDF</span>
+                  <span 
+                    className={styles.pdf_label} 
+                    style={isExternalUrl ? { background: "#4f46e5", color: "#fff" } : undefined}
+                  >
+                    {isExternalUrl ? "WEB" : "PDF"}
+                  </span>
                 </div>
 
+                {/* Название и статус */}
                 <div className={styles.doc_text_zone}>
                   <h3 className={styles.doc_item_title}>
                     {doc.title[currentLang] || doc.title.ru} {doc.isHidden && <span className="text-red-500 text-xs ml-2">(Скрыт)</span>}
                   </h3>
-                  <span className={styles.doc_item_size}>{doc.size}</span>
+                  <span className={styles.doc_item_size}>
+                    {isExternalUrl ? (uiTexts.external_resource[currentLang] || "Внешний ресурс") : doc.size}
+                  </span>
                 </div>
 
+                {/* Кнопка: либо переход по внешней ссылке, либо скачивание файла */}
                 <a 
-                  href={`/docs/${doc.file}`} 
+                  href={targetHref} 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className={styles.btn_download_file}
                 >
-                  <span>{uiTexts.btn_download[currentLang]}</span>
-                  <span style={{ fontSize: "16px" }}>⬇</span>
+                  <span>{isExternalUrl ? uiTexts.btn_open[currentLang] : uiTexts.btn_download[currentLang]}</span>
+                  <span style={{ fontSize: "16px" }}>{isExternalUrl ? "↗" : "⬇"}</span>
                 </a>
 
               </div>
