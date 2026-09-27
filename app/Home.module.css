@@ -45,7 +45,7 @@
   display: flex;
   align-items: center;
   position: relative;
-  background-image: linear-gradient(180deg, rgba(16, 38, 63, 0.82) 0%, rgba(16, 38, 63, 0.9) 100%), url('/mine.jpg');
+  background-image: linear-gradient(180deg, rgba(16, 38, 63, 0.82) 0%, rgba(16, 38, 63, 0.9) 100%), url('/mine1.jpg');
   background-size: cover;
   background-position: center;
   padding: 60px 0;

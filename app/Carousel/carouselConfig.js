@@ -1,7 +1,7 @@
 const cardDetails = [
   {
     id: 1,
-    imgUrl: "/carousel/minewatchslider.jpg",
+    imgUrl: "/carousel/minewatchslider1.jpg",
     alt: {
       ru: "Описание первого слайда",
       en: "First slide description",
@@ -20,7 +20,7 @@ const cardDetails = [
   },
   {
     id: 2,
-    imgUrl: "/carousel/minescadasoftware.jpg",
+    imgUrl: "/carousel/minescadasoftware1.jpg",
     alt: {
       ru: "Описание второго слайда",
       en: "Second slide description",
@@ -39,7 +39,7 @@ const cardDetails = [
   },
   {
     id: 3,
-    imgUrl: "/carousel/stedfast1.jpg",
+    imgUrl: "/carousel/stedfast11.jpg",
     alt: {
       ru: "Описание третьего слайда",
       en: "Third slide description",
@@ -58,7 +58,7 @@ const cardDetails = [
   },
   {
     id: 4,
-    imgUrl: "/carousel/montagehomepage2.jpg",
+    imgUrl: "/carousel/montagehomepage21.jpg",
     alt: {
       ru: "Описание четвертого слайда",
       en: "Fourth slide description",
