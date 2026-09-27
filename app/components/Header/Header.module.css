@@ -208,15 +208,15 @@
     line-height: 1;
   }
 
-  /* Главная корректировка: уменьшаем надпись в заголовке, чтобы всё поместилось */
+  
   .logo_sub {
-    font-size: 10.5px;
-    letter-spacing: 0.3px;
-    padding-left: 6px;
+    display: block; /* Гарантируем видимость */
+    font-size: 9.5px;
     line-height: 1.1;
-    white-space: normal; /* Разрешаем аккуратный перенос в 2 строки на экстремально узких экранах */
-    max-width: 110px;
-  }
+    max-width: 100px;
+    letter-spacing: 0.2px;
+  
+}
 
   /* Компактный правый блок */
   .header_right {
@@ -246,9 +246,3 @@
   }
 }
 
-/* На экранах тоньше 380px (iPhone SE и аналоги) скрываем длинный подзаголовок */
-@media (max-width: 380px) {
-  .logo_sub {
-    display: none; /* Оставляем только компактный логотип «ДДС» */
-  }
-}

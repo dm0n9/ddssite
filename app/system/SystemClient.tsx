@@ -473,13 +473,17 @@ export default function SystemsClient({ initialDbSystems, isAdmin }: { initialDb
                 </div>
               )}
 
-              <div className={styles.image_container}>
-                <img 
-                  src={item.image?.startsWith('http') || item.image?.startsWith('/') ? item.image : `/systems/${item.image}`} 
-                  alt={item.title[currentLang] || item.title.ru} 
-                  className={styles.system_img} 
-                />
-              </div>
+              <Link 
+  href={`/system/${item.slug}`} 
+  className={styles.image_container} 
+  style={{ cursor: "pointer", display: "block" }}
+>
+  <img 
+    src={item.image?.startsWith('http') || item.image?.startsWith('/') ? item.image : `/systems/${item.image}`} 
+    alt={item.title[currentLang] || item.title.ru} 
+    className={styles.system_img} 
+  />
+</Link>
 
               <div className={styles.info_block}>
                 <div>

@@ -610,14 +610,24 @@ function CatalogContent({ initialDbProducts, isAdmin }: { initialDbProducts: Pro
                     </div>
                   )}
                   <div className={styles.card_top_info}>
-                    <div className={styles.card_image_container}>
-                      <img src={p.image.startsWith('http') || p.image.startsWith('/') ? p.image : `/products/${p.image}`} alt={p.title[currentLang] || p.title.ru} className={styles.product_img} />
-                    </div>
-                    <div className={styles.card_info}>
-                      <h3 className={styles.card_title}>{p.title[currentLang] || p.title.ru}</h3>
-                      <p className={styles.card_desc}>{p.desc[currentLang] || p.desc.ru}</p>
-                    </div>
-                  </div>
+  <div 
+    className={styles.card_image_container} 
+    onClick={() => setSelectedProduct(p)} 
+    style={{ cursor: "pointer" }}
+    role="button"
+    tabIndex={0}
+  >
+    <img 
+      src={p.image.startsWith('http') || p.image.startsWith('/') ? p.image : `/products/${p.image}`} 
+      alt={p.title[currentLang] || p.title.ru} 
+      className={styles.product_img} 
+    />
+  </div>
+  <div className={styles.card_info}>
+    <h3 className={styles.card_title}>{p.title[currentLang] || p.title.ru}</h3>
+    <p className={styles.card_desc}>{p.desc[currentLang] || p.desc.ru}</p>
+  </div>
+</div>
                   <button className={styles.btn_more_full} onClick={() => setSelectedProduct(p)}>
                     <span>{uiTexts.btn_more[currentLang]}</span>
                     <span className={styles.btn_arrow}>→</span>

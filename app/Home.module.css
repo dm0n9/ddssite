@@ -1,19 +1,17 @@
-
-
+/* =====================================================================
+   КОНТЕЙНЕР
+   ===================================================================== */
 .container {
-  max-width: 1440px; /* было 1200px — на больших экранах контент выглядел узкой колонкой */
+  max-width: 1440px;
   margin: 0 auto;
   padding: 0 40px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 /* =====================================================================
-   ШАПКА
+   ШАПКА (НА СЛУЧАЙ ЛОКАЛЬНЫХ ЭЛЕМЕНТОВ)
    ===================================================================== */
-
-
-
-
 .headerInner {
   display: flex;
   align-items: center;
@@ -31,79 +29,18 @@
   color: #ffffff;
 }
 
-
-
 .link:hover {
   background-color: var(--color-navy-soft);
   color: #ffffff;
 }
 
 /* =====================================================================
-   ОБЩИЙ КАРКАС "СЛАЙДА" — каждый смысловой блок = один полноэкранный слайд
-   ===================================================================== */
-.slide {
-  /* Заменяем жесткий height на min-height, чтобы блок мог растягиваться при нехватке места */
-  min-height: calc(100vh - 100px);
-  height: auto; 
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  padding: 80px 0; /* Добавляем комфортные вертикальные отступы, чтобы контент не лип к краям */
-  overflow: visible; /* Убираем жесткую обрезку контента */
-  position: relative;
-}
-
-.slide_white {
-  background-color: var(--color-bg-white);
-}
-
-.slide_soft {
-  background-color: var(--color-bg-page);
-  border-top: 1px solid var(--color-border);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.slide_inner {
-  width: 100%;
-}
-
-/* Небольшая надпись-эйбрау над заголовком секции, как в шаблонах nicepage */
-.eyebrow {
-  display: inline-block;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--color-accent);
-  margin-bottom: 14px;
-}
-
-.sectionHead {
-  text-align: center;
-  max-width: 780px;
-  margin: 0 auto 64px auto;
-}
-
-.sectionTitle {
-  font-size: clamp(2rem, 3.6vw, 3rem); /* было до 2.4rem */
-  font-weight: 700;
-  color: var(--color-navy);
-  margin-bottom: 16px;
-  line-height: 1.2;
-}
-
-.sectionSubtitle {
-  color: var(--color-text-muted);
-  font-size: 1.15rem;
-  line-height: 1.6;
-}
-
-/* =====================================================================
-   HERO (главный слайд)
+   HERO (ГЛАВНЫЙ СЛАЙД — ОРИГИНАЛЬНАЯ ТИПОГРАФИКА)
    ===================================================================== */
 .hero {
-  height: calc(100vh - 100px);
   min-height: calc(100vh - 100px);
+  min-height: calc(100dvh - 70px); /* Учитывает плавающую панель мобильного браузера */
+  height: auto;
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -111,6 +48,8 @@
   background-image: linear-gradient(180deg, rgba(16, 38, 63, 0.82) 0%, rgba(16, 38, 63, 0.9) 100%), url('/mine.jpg');
   background-size: cover;
   background-position: center;
+  padding: 60px 0;
+  overflow: visible;
 }
 
 .heroContent {
@@ -128,13 +67,18 @@
   margin-bottom: 18px;
 }
 
+/* Возвращен оригинальный крупный заголовок */
 .heroTitle {
-  font-size: clamp(2.6rem, 6vw, 4.4rem); /* было до 3.4rem — на широком экране заголовок терялся */
+  font-size: clamp(2.6rem, 6vw, 4.4rem);
   font-weight: 700;
   line-height: 1.15;
   margin-bottom: 26px;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
 }
 
+/* Возвращено оригинальное крупное описание */
 .heroDescription {
   font-size: 1.2rem;
   line-height: 1.7;
@@ -188,42 +132,81 @@
 }
 
 /* =====================================================================
-   ОБЩИЙ КАРКАС "СЛАЙДА" — каждый смысловой блок = один полноэкранный слайд
+   ЕДИНЫЙ КАРКАС СЛАЙДОВ
    ===================================================================== */
 .slide {
-  
-  height: calc(100vh - 100px);;
   min-height: calc(100vh - 100px);
+  min-height: calc(100dvh - 70px);
+  height: auto;
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  padding: 0;
-  overflow: hidden;
+  padding: 80px 0;
+  overflow: visible;
+  position: relative;
 }
- 
+
 .slide_white {
   background-color: var(--color-bg-white);
 }
- 
+
 .slide_soft {
   background-color: var(--color-bg-page);
-  border-top: none;    /* Убрали border */
-  border-bottom: none; /* Убрали border */
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
- 
+
 .slide_inner {
   width: 100%;
 }
 
+.eyebrow {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 14px;
+}
+
+.sectionHead {
+  text-align: center;
+  max-width: 780px;
+  margin: 0 auto 64px auto;
+}
+
+.sectionTitle {
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  font-weight: 700;
+  color: var(--color-navy);
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.sectionSubtitle {
+  color: var(--color-text-muted);
+  font-size: 1.15rem;
+  line-height: 1.6;
+}
+
 /* =====================================================================
-   БЛОК СЛАЙДЕРА (витрина/карусель)
+   СЛАЙДЕР / КАРУСЕЛЬ
    ===================================================================== */
-.carouselWrap {
-  background: var(--color-bg-white);
-  border-radius: 18px;
-  padding: 40px;
-  box-shadow: var(--shadow-soft);
-  border: 1px solid var(--color-border);
+.sliderSlide {
+  width: 100%;
+  height: calc(100vh - 100px);
+  min-height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: var(--color-bg-white);
+}
+
+.sliderSlide > * {
+  width: 100%;
+  height: 100%;
 }
 
 /* =====================================================================
@@ -282,7 +265,7 @@
 }
 
 /* =====================================================================
-   ВИТРИНА ТОВАРОВ (содержимое карточек — без изменений)
+   ВИТРИНА ТОВАРОВ
    ===================================================================== */
 .cards_grid {
   display: grid;
@@ -414,7 +397,6 @@
   .slide {
     height: auto;
     min-height: auto;
-    
     overflow: visible;
     padding: 60px 0;
   }
@@ -440,51 +422,56 @@
 }
 
 @media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+
   .headerInner {
     flex-direction: column;
     gap: 12px;
   }
-  
+
+  /* В Hero-секции сохраняются исходные пропорции, но блок свободно растягивается по высоте под текст */
+  .hero {
+    height: auto;
+    min-height: calc(100dvh - 70px);
+    padding: 50px 0 70px 0;
+    align-items: center;
+  }
+
+  /* Кнопки перестраиваются вертикально на смартфонах */
   .heroActions {
     flex-direction: column;
     width: 100%;
+    gap: 12px;
   }
-  .slide,
-  .hero {
+
+  .btnPrimary,
+  .btnSecondary {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Слайды */
+  .slide {
     min-height: auto;
+    height: auto;
     padding: 50px 0;
+    overflow: visible;
+  }
+
+  .sliderSlide {
+    height: 55vh;
+    min-height: 300px;
   }
 
   .aboutImg {
-    max-width: 100%;    
-    margin-bottom: 20px; 
+    max-width: 100%;
+    margin-bottom: 20px;
   }
 
-  .aboutContent {
-    flex-direction: column; /* Картинка и текст встают друг под друга */
-    text-align: center;     /* (Опционально) Центрирование текста */
-  }
-}
-
-
-.sliderSlide {
-  height: auto;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background-color: var(--color-bg-white);
-}
- 
-.sliderSlide > * {
-  width: 100%;
-  height: 100%;
-}
-
-@media (max-width: 768px) {
-  .sliderSlide {
-    height: 55vh;
-    min-height: 320px;
+  .cards_grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
   }
 }
