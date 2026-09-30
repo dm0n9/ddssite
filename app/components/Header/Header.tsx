@@ -1,4 +1,4 @@
-// app/components/Header/Header.tsx
+
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -28,7 +28,7 @@ export default function Header() {
           <span className={styles.logo_sub}>Девис Дерби Сибирь</span>
         </div>
 
-       {/* Навигационное меню (ПК или выпадающее на мобильных) */}
+
         <nav className={`${styles.nav} ${isMenuOpen ? styles.nav_open : ""}`}>
           {NAV_ITEMS.map((item) => (
             <Link
@@ -42,7 +42,7 @@ export default function Header() {
           ))}
         </nav>
 
-        {/* Правая зона: Кнопка бургера + Переключатель языков */}
+
         <div className={styles.header_right}>
           <div className={styles.lang_switcher}>
             {(["ru", "en", "cn"] as const).map((l) => (

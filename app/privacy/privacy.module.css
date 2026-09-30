@@ -1,4 +1,4 @@
-/* Общий макет страницы */
+
 .main_layout {
   background-color: #f4f7f6;
   color: #1a202c;
@@ -13,7 +13,7 @@
   padding: 0 20px;
 }
 
-/* Шапка страницы */
+
 .hero_section {
   padding-top: 40px;
   margin-bottom: 32px;
@@ -49,7 +49,7 @@
   margin: 0;
 }
 
-/* Белая карточка с контентом политики */
+
 .content_card {
   background: #ffffff;
   border: 1px solid #cfd8dc;
@@ -67,7 +67,7 @@
   border-bottom: 1px solid #edf2f7;
 }
 
-/* Нумерованные разделы */
+
 .section {
   margin-bottom: 32px;
 }
@@ -98,7 +98,7 @@
   margin-bottom: 12px;
 }
 
-/* Списки подпунктов */
+
 .list {
   list-style: none;
   padding-left: 0;
@@ -126,7 +126,7 @@
   top: -2px;
 }
 
-/* Контактная плашка в конце */
+
 .contacts_box {
   background-color: #f8fafc;
   border: 1px solid #e2e8f0;
@@ -142,7 +142,7 @@
   color: #2d3748;
 }
 
-/* Адаптивность для мобильных устройств */
+
 @media (max-width: 640px) {
   .content_card {
     padding: 24px 18px;
@@ -158,13 +158,13 @@
 }
 
 .link {
-  color: #2f8fdd; /* Фирменный голубой акцент */
+  color: #2f8fdd;
   text-decoration: underline;
   text-underline-offset: 3px;
   transition: color 0.2s ease-in-out;
 }
 
 .link:hover {
-  color: #ffffff; /* При наведении подсвечиваем белым */
+  color: #ffffff; 
   text-decoration: underline;
 }

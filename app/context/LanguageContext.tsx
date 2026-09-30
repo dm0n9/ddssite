@@ -1,9 +1,9 @@
-// context/LanguageContext.tsx
+
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
 
-// Доступные языки
+
 export type Language = "ru" | "en" | "cn";
 
 interface LanguageContextType {
@@ -11,10 +11,9 @@ interface LanguageContextType {
   setCurrentLang: (lang: Language) => void;
 }
 
-// Создаем сам контекст
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-// Провайдер, который обернет наше приложение
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [currentLang, setCurrentLang] = useState<Language>("ru");
 
@@ -25,7 +24,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Удобный хук для использования в других файлах
+
 export function useLanguage() {
   const context = useContext(LanguageContext);
   if (!context) {

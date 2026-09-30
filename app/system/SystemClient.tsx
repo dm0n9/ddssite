@@ -17,7 +17,6 @@ export default function SystemsClient({ initialDbSystems, isAdmin }: { initialDb
   const [isSaving, setIsSaving] = useState(false); 
   const [editingSystem, setEditingSystem] = useState<any | null>(null);
 
-  // Стейты для управления формой и предпросмотром
   const [appCount, setAppCount] = useState(3);
   const [specCount, setSpecCount] = useState(3);
   const [extraImgCount, setExtraImgCount] = useState(0);
@@ -31,13 +30,11 @@ export default function SystemsClient({ initialDbSystems, isAdmin }: { initialDb
     extraImages: {} as Record<number, string>,
   });
 
-  // Константы стилей Tailwind для инпутов
   const twInput = "w-full border border-gray-300 rounded-md p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none bg-white transition-colors placeholder-gray-400";
   const twLabel = "block text-sm font-semibold text-gray-700 mb-1.5";
   const twAddBtn = "mt-1 bg-gray-100 text-gray-700 font-medium py-1.5 px-3 border border-gray-300 rounded text-sm hover:bg-gray-200 transition-colors self-start";
   const twSectionTitle = "text-lg font-bold text-gray-900 mt-6 mb-3 border-b border-gray-100 pb-2";
 
-  // Обработчики предпросмотра
   const handlePreviewChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (name === "titleRu") setPreviewData((prev) => ({ ...prev, title: value }));
@@ -80,7 +77,6 @@ export default function SystemsClient({ initialDbSystems, isAdmin }: { initialDb
     }
   };
 
-  // Инициализация редактирования
   const handleEdit = (system: any) => {
     setEditingSystem(system);
     setAppCount(Math.max(3, system.applications?.ru?.length || 3));
@@ -103,7 +99,6 @@ export default function SystemsClient({ initialDbSystems, isAdmin }: { initialDb
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Функции для видимости и сортировки
   const handleToggleVisibility = (id: string, currentHidden: boolean) => {
     startTransition(async () => {
       await toggleSystemVisibility(id, !currentHidden);
@@ -146,7 +141,6 @@ export default function SystemsClient({ initialDbSystems, isAdmin }: { initialDb
   return (
     <main className={styles.main_layout}>
       
-      {/* ВЕРХНЯЯ ПАНЕЛЬ АДМИНИСТРАТОРА */}
       {isAdmin && (
         <div className={styles.container} style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "15px 20px" }}>
           <button 
@@ -182,7 +176,6 @@ export default function SystemsClient({ initialDbSystems, isAdmin }: { initialDb
         </div>
       )}
 
-      {/* ФОРМА АДМИНКИ */}
       {isPanelOpen && isAdmin && (
         <div className={styles.container}>
           <div className="w-full mx-auto mb-12 mt-2">
@@ -359,7 +352,6 @@ export default function SystemsClient({ initialDbSystems, isAdmin }: { initialDb
                 </div>
               </form>
 
-              {/* БЛОК ПРЕДПРОСМОТРА СПРАВА */}
               <div className="h-full">
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col sticky top-20 max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full">
                   
@@ -445,13 +437,11 @@ export default function SystemsClient({ initialDbSystems, isAdmin }: { initialDb
         </div>
       </section>
 
-      {/* ВЫВОД КАРТОЧЕК СИСТЕМ */}
       <section className={styles.container}>
         <div className={styles.systems_list}>
           {initialDbSystems.filter(s => isAdmin ? true : !s.isHidden).map((item) => (
             <article key={item.id} className={`${styles.system_card} relative ${item.isHidden ? "opacity-60 bg-gray-50" : ""}`}>
               
-              {/* ПЛАШКА АДМИНА ПОВЕРХ КАРТОЧКИ */}
               {isAdmin && (
                 <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
                   <button onClick={() => handleEdit(item)} className="bg-white/95 backdrop-blur-sm border border-blue-200 text-blue-600 px-3 py-1.5 rounded-md text-[11px] font-black uppercase tracking-wider hover:bg-blue-50 shadow-md">Изменить</button>

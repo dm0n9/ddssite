@@ -85,7 +85,7 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
 
   return (
     <main className={styles.main_layout}>
-      {/* ПАНЕЛЬ АДМИНИСТРАТОРА */}
+
       {isAdmin && (
         <div className={styles.container} style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "15px 20px" }}>
           <button 
@@ -113,7 +113,7 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
         </div>
       )}
 
-      {/* ФОРМА ДОБАВЛЕНИЯ/РЕДАКТИРОВАНИЯ */}
+
       {isPanelOpen && isAdmin && (
         <div style={{ maxWidth: "800px", margin: "20px auto", padding: "0 20px" }}>
           <form 
@@ -201,13 +201,13 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
         </div>
       )}
 
-      {/* ОСНОВНОЙ СПИСОК */}
+
       <section className={styles.container} style={{ paddingTop: "40px", paddingBottom: "60px" }}>
         <h1 className={styles.main_title} style={{ margin: "0 0 30px 0" }}>
           {uiTexts.docs_page_title[currentLang]}
         </h1>
 
-        {/* Табы фильтров */}
+
         <div className={styles.docs_tabs}>
           <button className={`${styles.tab_filter} ${activeCategory === "all" ? styles.tab_filter_active : ""}`} onClick={() => setActiveCategory("all")}>
             {uiTexts.tab_all[currentLang]}
@@ -223,7 +223,6 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
           </button>
         </div>
 
-        {/* Список документов */}
         <div className={styles.docs_list_container}>
           {filteredDocs.map((doc) => {
             const isExternalUrl = /^https?:\/\//i.test(doc.file);
@@ -238,7 +237,6 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
                   opacity: doc.isHidden ? 0.6 : 1 
                 }}
               >
-                {/* Панель админа над строкой */}
                 {isAdmin && (
                   <div className="absolute top-2.5 left-4 z-20 flex items-center gap-2">
                     <button 
@@ -270,7 +268,6 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
                   </div>
                 )}
 
-                {/* Иконка PDF или WEB */}
                 <div className={styles.doc_icon_zone}>
                   <span 
                     className={styles.pdf_label} 
@@ -280,7 +277,6 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
                   </span>
                 </div>
 
-                {/* Название и статус */}
                 <div className={styles.doc_text_zone}>
                   <h3 className={styles.doc_item_title}>
                     {doc.title[currentLang] || doc.title.ru} {doc.isHidden && <span className="text-red-500 text-xs ml-2">(Скрыт)</span>}
@@ -290,7 +286,6 @@ export default function DocsClient({ initialDbDocs, isAdmin }: { initialDbDocs: 
                   </span>
                 </div>
 
-                {/* Кнопка: либо переход по внешней ссылке, либо скачивание файла */}
                 <a 
                   href={targetHref} 
                   target="_blank" 

@@ -128,7 +128,7 @@ export const Carousel = () => {
               overflow: "hidden",
             }}
           >
-            {/* Картинка слайда */}
+
 <div style={{ position: "relative", width: "100%", height: "100%", backgroundColor: "#0d233a" }}>
   <Image
     src={card.imgUrl}
@@ -136,14 +136,14 @@ export const Carousel = () => {
     fill
     sizes="(max-width: 768px) 100vw, 100vw"
     style={{ 
-      objectFit: "contain", /* Картинка сжимается и уменьшается пропорционально, без обрезки */
+      objectFit: "contain", 
       objectPosition: "center" 
     }}
     priority={index === 1}
   />
 </div>
 
-            {/* ТЕКСТОВЫЙ ОВЕРЛЕЙ ПОВЕРХ ИЗОБРАЖЕНИЯ */}
+
 <div
   style={{
     position: "absolute",
@@ -152,7 +152,7 @@ export const Carousel = () => {
     width: "100%",
     backgroundColor: "rgba(0, 0, 0, 0.7)",
     backdropFilter: "blur(4px)",
-    padding: "16px 20px 48px 20px", /* Уменьшенные отступы снизу */
+    padding: "16px 20px 48px 20px", 
     boxSizing: "border-box",
     color: "#ffffff",
     zIndex: 1,
@@ -162,7 +162,7 @@ export const Carousel = () => {
     <h3
       style={{
         margin: "0 0 6px 0",
-        fontSize: "clamp(1.1rem, 2.5vw, 1.8rem)", /* Плавно сжимается при уменьшении экрана */
+        fontSize: "clamp(1.1rem, 2.5vw, 1.8rem)", 
         fontWeight: 600,
         color: "#ffffff",
       }}
@@ -174,7 +174,7 @@ export const Carousel = () => {
     <p
       style={{
         margin: 0,
-        fontSize: "clamp(0.85rem, 1.8vw, 1.2rem)", /* Плавно уменьшается */
+        fontSize: "clamp(0.85rem, 1.8vw, 1.2rem)", 
         lineHeight: 1.4,
         color: "rgba(255, 255, 255, 0.85)",
         maxWidth: "800px",
@@ -188,7 +188,7 @@ export const Carousel = () => {
         ))}
       </div>
 
-      {/* Кнопки навигации и точки */}
+
       {hasMultipleSlides && (
         <>
           <button

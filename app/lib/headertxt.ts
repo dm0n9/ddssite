@@ -1,4 +1,4 @@
-// app/lib/headertxt.ts
+
 export const menuTexts = {
   home: { ru: "На главную", en: "Home", cn: "首页" },
   about: { ru: "О нас", en: "About Us", cn: "关于我们" },

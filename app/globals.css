@@ -6,12 +6,12 @@
 }
 
 :root {
-  --color-navy: #10263f;        /* тёмно-синий (шапка, оверлей hero, акцентные заголовки) */
-  --color-navy-soft: #1a3a5c;   /* чуть светлее навигационных ссылок при hover */
-  --color-accent: #2f8fdd;      /* фирменный голубой акцент */
-  --color-accent-soft: #eaf4fd; /* очень светлый голубой (плашки, hover) */
-  --color-bg-page: #eef3f8;     /* мягкий серо-голубой фон нечётных слайдов */
-  --color-bg-white: #ffffff;    /* фон чётных слайдов */
+  --color-navy: #10263f;       
+  --color-navy-soft: #1a3a5c;   
+  --color-accent: #2f8fdd;    
+  --color-accent-soft: #eaf4fd; 
+  --color-bg-page: #eef3f8;     
+  --color-bg-white: #ffffff;    
   --color-border: #dbe6ef;
   --color-text: #223142;
   --color-text-muted: #0a0c0e;

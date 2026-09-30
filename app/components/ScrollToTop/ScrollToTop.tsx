@@ -6,7 +6,7 @@ import styles from './ScrollToTop.module.css';
 export default function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false);
 
-  // Следим за скроллом страницы
+
   useEffect(() => {
     const toggleVisibility = () => {
       if (window.scrollY > 300) {
@@ -18,11 +18,11 @@ export default function ScrollToTop() {
 
     window.addEventListener('scroll', toggleVisibility);
     
-    // Обязательно удаляем обработчик при размонтировании
+
     return () => window.removeEventListener('scroll', toggleVisibility);
   }, []);
 
-  // Функция плавной прокрутки наверх
+
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -36,7 +36,6 @@ export default function ScrollToTop() {
       className={`${styles.scrollToTop} ${isVisible ? styles.visible : ''}`}
       aria-label="Прокрутить вверх"
     >
-      {/* Простая и легкая SVG-стрелочка внутри круга */}
       <svg 
         xmlns="http://www.w3.org/2000/svg" 
         fill="none" 

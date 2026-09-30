@@ -11,7 +11,7 @@ export default function PrivacyPage() {
   return (
     <main className={styles.main_layout}>
       <div className={styles.container}>
-        {/* Шапка с кнопкой возврата */}
+       
         <section className={styles.hero_section}>
           <Link href="/" className={styles.back_link}>
             ← {currentLang === "ru" ? "На главную" : "Back to Home"}
@@ -28,11 +28,11 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        {/* Основной текстовый блок */}
+       
         <div className={styles.content_card}>
           
 
-          {/* Пункт 1 */}
+          
           <section className={styles.section}>
             <h2 className={styles.section_title}>
               <span className={styles.section_num}>1.</span> Общие положения
@@ -48,7 +48,7 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          {/* Пункт 2 */}
+          
           <section className={styles.section}>
             <h2 className={styles.section_title}>
               <span className={styles.section_num}>2.</span> Состав обрабатываемых данных
@@ -75,7 +75,7 @@ export default function PrivacyPage() {
             </ul>
           </section>
 
-          {/* Пункт 3 */}
+         
           <section className={styles.section}>
             <h2 className={styles.section_title}>
               <span className={styles.section_num}>3.</span> Цели обработки
@@ -91,7 +91,7 @@ export default function PrivacyPage() {
             </ul>
           </section>
 
-          {/* Пункт 4 */}
+         
           <section className={styles.section}>
             <h2 className={styles.section_title}>
               <span className={styles.section_num}>4.</span> Правовые основания
@@ -102,7 +102,7 @@ export default function PrivacyPage() {
             
           </section>
 
-          {/* Пункт 5 */}
+          
           <section className={styles.section}>
             <h2 className={styles.section_title}>
               <span className={styles.section_num}>5.</span> Порядок обработки и защиты данных
@@ -118,112 +118,107 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          {/* Пункт 6 */}
-<section className={styles.section}>
-  <h2 className={styles.section_title}>
-    <span className={styles.section_num}>6.</span> Отказ от обработки
-  </h2>
-  <p className={styles.paragraph}>
-    6.1. Пользователь может в любой момент отказаться от сбора данных (cookie), изменив настройки своего браузера или прекратив использование сайта.
-  </p>
-  <p className={styles.paragraph}>
-    6.2. Для того чтобы прекратить обработку Cookie, Пользователи могут в настройках браузера самостоятельно ограничить или полностью отключить их использование. С момента такого ограничения или отключения обработка Cookie прекращается. Для этого необходимо изменить настройки браузера, чтобы блокировать определённые cookies. Однако важно отметить, что без использования технически необходимых cookies многие функции сайта могут работать некорректно или стать недоступными. Для изменения настроек cookies в популярных браузерах пользователи могут воспользоваться следующими инструкциями:
-  </p>
+          
+          <section className={styles.section}>
+            <h2 className={styles.section_title}>
+              <span className={styles.section_num}>6.</span> Отказ от обработки
+            </h2>
+            <p className={styles.paragraph}>
+              6.1. Пользователь может в любой момент отказаться от сбора данных (cookie), изменив настройки своего браузера или прекратив использование сайта.
+            </p>
+            <p className={styles.paragraph}>
+              6.2. Для того чтобы прекратить обработку Cookie, Пользователи могут в настройках браузера самостоятельно ограничить или полностью отключить их использование. С момента такого ограничения или отключения обработка Cookie прекращается. Для этого необходимо изменить настройки браузера, чтобы блокировать определённые cookies. Однако важно отметить, что без использования технически необходимых cookies многие функции сайта могут работать некорректно или стать недоступными. Для изменения настроек cookies в популярных браузерах пользователи могут воспользоваться следующими инструкциями:
+            </p>
 
   
-  <ul className={styles.list}>
-    
-    {/* Google Chrome */}
-    <li> 
-      <strong>Google Chrome:</strong>
-      <ul className={styles.list}> 
-        <li>
-          <Link 
-            href="https://support.google.com/chrome/answer/95647?hl=ru&hlrm=ru" 
-            className={styles.link}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            https://support.google.com/chrome/answer/95647?hl=ru&hlrm=ru
-          </Link>
-        </li> 
-      </ul>
-    </li>
+            <ul className={styles.list}>
+              
+              <li> 
+                <strong>Google Chrome:</strong>
+                <ul className={styles.list}> 
+                  <li>
+                    <Link 
+                      href="https://support.google.com/chrome/answer/95647?hl=ru&hlrm=ru" 
+                      className={styles.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      https://support.google.com/chrome/answer/95647?hl=ru&hlrm=ru
+                    </Link>
+                  </li> 
+                </ul>
+              </li>
 
-    
-    <li> 
-      <strong>Mozilla Firefox:</strong>
-      <ul className={styles.list}> 
-        <li> 
-          <Link 
-            href="https://support.mozilla.org/ru/kb/uluchshennaya-zashita-ot-otslezhivaniya-firefox-dlya-kompyutera" 
-            className={styles.link}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            https://support.mozilla.org/ru/kb/uluchshennaya-zashita-ot-otslezhivaniya-firefox-dlya-kompyutera
-          </Link> 
-        </li> 
-      </ul>
-    </li>
+              
+              <li> 
+                <strong>Mozilla Firefox:</strong>
+                <ul className={styles.list}> 
+                  <li> 
+                    <Link 
+                      href="https://support.mozilla.org/ru/kb/uluchshennaya-zashita-ot-otslezhivaniya-firefox-dlya-kompyutera" 
+                      className={styles.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      https://support.mozilla.org/ru/kb/uluchshennaya-zashita-ot-otslezhivaniya-firefox-dlya-kompyutera
+                    </Link> 
+                  </li> 
+                </ul>
+              </li>
 
-    
-    <li> 
-      <strong>Microsoft Edge:</strong>
-      <ul className={styles.list}> 
-        <li> 
-          <Link 
-            href="https://support.microsoft.com/ru-ru/windows/управление-файлами-cookie-в-microsoft-edge-просмотр-разрешение-блокировка-удаление-и-использование-168dab11-0753-043d-7c16-ede5947fc64d" 
-            className={styles.link}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            https://support.microsoft.com/ru-ru/windows/управление-файлами-cookie-в-microsoft-edge-просмотр-разрешение-блокировка-удаление-и-использование-168dab11-0753-043d-7c16-ede5947fc64d
-          </Link> 
-        </li> 
-      </ul>
-    </li>
+              
+              <li> 
+                <strong>Microsoft Edge:</strong>
+                <ul className={styles.list}> 
+                  <li> 
+                    <Link 
+                      href="https://support.microsoft.com/ru-ru/windows/управление-файлами-cookie-в-microsoft-edge-просмотр-разрешение-блокировка-удаление-и-использование-168dab11-0753-043d-7c16-ede5947fc64d" 
+                      className={styles.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      https://support.microsoft.com/ru-ru/windows/управление-файлами-cookie-в-microsoft-edge-просмотр-разрешение-блокировка-удаление-и-использование-168dab11-0753-043d-7c16-ede5947fc64d
+                    </Link> 
+                  </li> 
+                </ul>
+              </li>
 
-    {/* Safari */}
-    <li> 
-      <strong>Safari:</strong>
-      <ul className={styles.list}> 
-        <li> 
-          <Link 
-            href="https://support.apple.com/ru-ru/105082" 
-            className={styles.link}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            https://support.apple.com/ru-ru/105082
-          </Link> 
-        </li> 
-      </ul>
-    </li>
+              <li> 
+                <strong>Safari:</strong>
+                <ul className={styles.list}> 
+                  <li> 
+                    <Link 
+                      href="https://support.apple.com/ru-ru/105082" 
+                      className={styles.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      https://support.apple.com/ru-ru/105082
+                    </Link> 
+                  </li> 
+                </ul>
+              </li>
 
-    {/* Yandex */}
-    <li> 
-      <strong>Yandex:</strong>
-      <ul className={styles.list}> 
-        <li> 
-          <Link 
-            href="https://yandex.ru/support/browser/ru/personal-data-protection/cookies" 
-            className={styles.link}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            https://yandex.ru/support/browser/ru/personal-data-protection/cookies
-          </Link> 
-        </li> 
-      </ul>
-    </li>
+              <li> 
+                <strong>Yandex:</strong>
+                <ul className={styles.list}> 
+                  <li> 
+                    <Link 
+                      href="https://yandex.ru/support/browser/ru/personal-data-protection/cookies" 
+                      className={styles.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      https://yandex.ru/support/browser/ru/personal-data-protection/cookies
+                    </Link> 
+                  </li> 
+                </ul>
+              </li>
 
-  </ul>
-</section>
+            </ul>
+          </section>
 
-          {/* Пункт 7 */}
           <section className={styles.section}>
-            {/* Контактная информация */}
             <div className={styles.contacts_box}>
               <p>
                 <strong>Контакты для обращений:</strong>

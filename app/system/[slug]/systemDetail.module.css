@@ -12,7 +12,6 @@
   padding: 0 20px;
 }
 
-/* Навигация назад */
 .nav_header {
   padding-top: 40px;
   margin-bottom: 24px;
@@ -34,7 +33,6 @@
   transform: translateX(-4px);
 }
 
-/* Основной белый блок системы */
 .content_card {
   background: #ffffff;
   border: 1px solid #cfd8dc;
@@ -44,7 +42,6 @@
   padding: 40px;
 }
 
-/* Верхняя плашка и бейдж */
 .header_row {
   display: flex;
   justify-content: space-between;
@@ -63,7 +60,6 @@
   text-transform: uppercase;
 }
 
-/* Верхняя сетка: фото слева, текст справа */
 .grid_two_cols {
   display: grid;
   grid-template-columns: 1fr 1.3fr;
@@ -102,7 +98,6 @@
   margin-bottom: 24px;
 }
 
-/* Список особенностей */
 .specs_section {
   margin-top: 20px;
 }
@@ -126,7 +121,6 @@
   margin-bottom: 10px;
 }
 
-/* Таблица технических характеристик */
 .table_section {
   margin-top: 48px;
   border-top: 1px solid #e2e8f0;

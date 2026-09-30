@@ -1,4 +1,4 @@
-// app/contacts/page.tsx
+
 "use client";
 
 import React from 'react';
@@ -21,19 +21,19 @@ export default function ContactsPage() {
   return (
     <main className={styles.pageWrapper}>
       <section className={styles.section}>
-        {/* Главный стандартный контейнер сайта, удерживающий контент в рамках 1200px */}
+
         <div className={styles.container}>
           
-          {/* Заголовок страницы */}
+
           <h1 className={styles.title}>{contactsTexts.title[currentLang]}</h1>
           <p className={styles.Conttext}>
             {contactsTexts.description[currentLang]}
           </p>
 
-          {/* Сетка с контактной информацией */}
+
           <div className={styles.grid}>
             
-            {/* Блок 1: Адрес */}
+
             <div className={styles.card}>
               <h2 className={styles.cardTitle}>{contactsTexts.address_title[currentLang]}</h2>
               <p className={styles.cardText}>
@@ -43,7 +43,7 @@ export default function ContactsPage() {
               </p>
             </div>
             
-            {/* Блок 2: Телефон */}
+
             <div className={styles.card}>
               <h2 className={styles.cardTitle}>{contactsTexts.phone_title[currentLang]}</h2>
               <p className={styles.cardText}>
@@ -54,7 +54,7 @@ export default function ContactsPage() {
               </p>
             </div>
             
-            {/* Блок 3: Email */}
+
             <div className={styles.card}>
               <h2 className={styles.cardTitle}>{contactsTexts.email_title[currentLang]}</h2>
               <p className={styles.cardText}>
@@ -66,7 +66,7 @@ export default function ContactsPage() {
             
           </div>
 
-          {/* Интерактивная карта 2ГИС */}
+
           <div className={styles.mapWrapper}>
             <h2 className={styles.mapTitle}>{contactsTexts.map_title[currentLang]}</h2>
             <div className={styles.mapContainer}>
@@ -82,7 +82,7 @@ export default function ContactsPage() {
             </div>
           </div>
 
-          {/*Кнопка возврата на главную */}
+
           <div className={styles.buttonWrapper}>
             <Link href="/" className={styles.btnHome}>
               {uiTexts.btn_home[currentLang]}

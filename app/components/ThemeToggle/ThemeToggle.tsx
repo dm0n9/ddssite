@@ -7,7 +7,7 @@ export const ThemeToggle = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
-    // При загрузке читаем сохраненную тему из cookie
+
     const savedTheme = getCookie('theme_preference') as 'light' | 'dark' | null;
     if (savedTheme) {
       setTheme(savedTheme);
@@ -19,10 +19,10 @@ export const ThemeToggle = () => {
     const nextTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(nextTheme);
     
-    // Применяем тему на <html> теге
+
     document.documentElement.setAttribute('data-theme', nextTheme);
     
-    // Сохраняем тему в cookie на 365 дней
+
     setCookie('theme_preference', nextTheme, 365);
   };
 

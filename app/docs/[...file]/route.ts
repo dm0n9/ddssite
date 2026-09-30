@@ -13,16 +13,13 @@ export async function GET(
       return new NextResponse("Файл не указан", { status: 400 });
     }
 
-    // Ищем файл физически в папке public/docs/
     const baseDir = path.resolve(process.cwd(), "public", "docs");
     const targetPath = path.resolve(baseDir, ...file);
 
-    // 🔒 Защита от Path Traversal (запрет выхода выше public/docs)
     if (!targetPath.startsWith(baseDir)) {
       return new NextResponse("Доступ запрещен", { status: 403 });
     }
 
-    // Если файла физически нет на диске сервера
     if (!fs.existsSync(targetPath)) {
       return new NextResponse("Документ не найден на диске", { status: 404 });
     }
@@ -30,11 +27,10 @@ export async function GET(
     const stat = fs.statSync(targetPath);
     const rawFileName = file[file.length - 1];
     
-    // Декодируем и заново кодируем имя для безопасной отдачи русских букв
     const decodedFileName = decodeURIComponent(rawFileName);
     const encodedFileName = encodeURIComponent(decodedFileName);
 
-    // Стриминг файла кусочками через Node.js stream (не забивает оперативную память)
+
     const nodeStream = fs.createReadStream(targetPath);
     const webStream = new ReadableStream({
       start(controller) {
@@ -51,7 +47,6 @@ export async function GET(
       headers: {
         "Content-Type": "application/pdf",
         "Content-Length": stat.size.toString(),
-        // RFC 5987: принудительное скачивание с сохранением оригинального имени файла
         "Content-Disposition": `attachment; filename="${encodedFileName}"; filename*=UTF-8''${encodedFileName}`,
         "Cache-Control": "no-store, max-age=0",
       },

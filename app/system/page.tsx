@@ -1,4 +1,4 @@
-import { prisma } from "@/app/lib/db"; // Убедитесь, что путь к prisma верный
+import { prisma } from "@/app/lib/db";
 import SystemsClient from "@/app/system/SystemClient";
 import { cookies } from "next/headers";
 
@@ -12,7 +12,6 @@ export default async function SystemsPage() {
   const isAdmin = session?.value === "authenticated";
   
   try {
-    // Получаем системы из базы, отсортированные по порядку
     dbSystems = await prisma.system.findMany({
       orderBy: [
         { order: 'asc' },

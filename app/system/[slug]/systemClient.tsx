@@ -15,10 +15,10 @@ export default function SystemClient({ systemData }: { systemData: any }) {
     th_value: { ru: "Значение", en: "Value", cn: "数值" },
   };
 
-  // В БД массив особенностей сохраняется в поле applications (как у товаров)
+
   const features = systemData?.applications?.[currentLang] || systemData?.applications?.ru || [];
   
-  // Таблица сохраняется в поле specifications
+
   const tableData = Array.isArray(systemData?.specifications) 
     ? systemData.specifications 
     : [];
@@ -27,14 +27,12 @@ export default function SystemClient({ systemData }: { systemData: any }) {
     <main className={styles.main_layout}>
       <div className={styles.container}>
         
-        {/* Кнопка возврата к списку систем */}
         <div className={styles.nav_header}>
           <Link href="/system" className={styles.back_link}>
             ← {uiTexts.back[currentLang as keyof typeof uiTexts.back] || uiTexts.back.ru}
           </Link>
         </div>
 
-        {/* Карточка системы */}
         <article className={styles.content_card}>
           <div className={styles.header_row}>
           </div>
@@ -42,8 +40,7 @@ export default function SystemClient({ systemData }: { systemData: any }) {
           <div className={styles.grid_two_cols}>
             <div className={styles.image_wrapper}>
               <img
-                // Ищем картинку в папке /systems/ (как прописано в ваших серверных экшенах)
-                // Если картинки остались в /products/, просто поменяйте путь
+
                 src={systemData.image?.startsWith('http') ? systemData.image : `/systems/${systemData.image}`}
                 alt={systemData.title?.[currentLang] || systemData.title?.ru}
                 className={styles.product_image}
@@ -77,7 +74,6 @@ export default function SystemClient({ systemData }: { systemData: any }) {
             </div>
           </div>
 
-          {/* Таблица параметров */}
           {tableData.length > 0 && (
             <div className={styles.table_section}>
               <h3 className={styles.section_subtitle}>

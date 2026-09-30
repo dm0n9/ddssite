@@ -13,7 +13,6 @@ export default function Home() {
       
   return (
     <main>
-      {/* СЛАЙД 1 — ГЛАВНЫЙ ЭКРАН (HERO) */}
       <section className={styles.hero}>
         <div className={styles.container}>
           <div className={styles.heroContent}>
@@ -39,12 +38,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* СЛАЙД 2 — СЛАЙДЕР / КАРУСЕЛЬ */}
       <section className={styles.sliderSlide}>
         <Carousel />
       </section>
 
-      {/* СЛАЙД 3 — О КОМПАНИИ */}
+
       <section id="about" className={`${styles.slide} ${styles.slide_soft}`}>
         <div className={styles.container}>
           <div className={styles.aboutGrid}>
@@ -86,7 +84,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* СЛАЙД 4 — ВИТРИНА ТОВАРОВ */}
+
       <section id="products" className={`${styles.slide} ${styles.slide_white}`}>
         <div className={styles.container}>
           <div className={styles.slide_inner}>
@@ -122,7 +120,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* СЛАЙД 5 — НОВОСТИ КОМПАНИИ */}
+
       <section className={`${styles.slide} ${styles.slide_soft}`}>
         <div className={styles.container}>
           <div className={styles.slide_inner}>

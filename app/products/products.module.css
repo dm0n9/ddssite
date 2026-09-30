@@ -11,28 +11,24 @@
   padding: 0 20px;
 }
 
-/* ======================================= */
-/* ОБНОВЛЕННЫЕ СТИЛИ ДЛЯ ШАПКИ И НАВИГАЦИИ */
-/* ======================================= */
 
 .header {
-  background-color: #008be2; /* Яркий, чистый сине-голубой цвет как на скриншоте */
-  box-shadow: 0 4px 12px rgba(0, 139, 226, 0.15); /* Мягкая тень под шапкой */
-  padding: 0; /* Высота теперь регулируется внутренними отступами элементов */
+  background-color: #008be2; 
+  box-shadow: 0 4px 12px rgba(0, 139, 226, 0.15); 
+  padding: 0; 
   position: sticky;
   top: 0;
   window-filter: blur(8px);
-  z-index: 999; /* Чтобы шапка оставалась поверх каталога при прокрутке */
+  z-index: 999; 
 }
 
 .header_flex {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 70px; /* Фиксированная комфортная высота панели */
+  height: 70px; 
 }
 
-/* Блок логотипа */
 .logo_block {
   display: flex;
   align-items: center;
@@ -50,14 +46,14 @@
 .logo_sub {
   font-weight: 400;
   font-size: 14px;
-  color: #e0f2fe; /* Нежно-голубой оттенок для контраста */
+  color: #e0f2fe; 
   text-transform: uppercase;
   letter-spacing: 1px;
   border-left: 1px solid rgba(255, 255, 255, 0.3);
   padding-left: 8px;
 }
 
-/* Ссылка навигации */
+
 .nav_menu {
   display: flex;
   gap: 5px;
@@ -77,19 +73,18 @@
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Эффект наведения на пункт меню */
 .nav_link:hover {
-  background-color: rgba(255, 255, 255, 0.1); /* Легкое интерактивное подсвечивание */
+  background-color: rgba(255, 255, 255, 0.1); 
 }
 
-/* Выделение текущей открытой страницы (Продукция) */
+
 .nav_link_active {
-  background-color: rgba(0, 0, 0, 0.12); /* Затемненная активная плашка */
+  background-color: rgba(0, 0, 0, 0.12); 
   font-weight: 600;
-  box-shadow: inset 0 -3px 0 #ffffff; /* Белая полоса снизу акцентирует внимание */
+  box-shadow: inset 0 -3px 0 #ffffff; 
 }
 
-/* Кнопки переключения языков */
+
 .lang_switcher {
   display: flex;
   gap: 4px;
@@ -113,13 +108,12 @@
 }
 
 .header_btn_active {
-  background: #ffffff; /* Активный язык горит белым фоном */
-  color: #008be2; /* Текст красится в цвет шапки */
+  background: #ffffff; 
+  color: #008be2; 
   border-color: #ffffff;
   font-weight: 700;
 }
 
-/* Скрытие меню на маленьких экранах телефонов для сохранности верстки */
 @media (max-width: 900px) {
   .nav_menu {
     display: none; 
@@ -132,7 +126,7 @@
 
 .main_title {
   font-size: 28px;
-  color: #0d233a; /* Темно-синий заголовок */
+  color: #0d233a;
   margin: 40px 0 24px 0;
   font-weight: 700;
 }
@@ -144,34 +138,31 @@
   padding-bottom: 60px;
 }
 
-/* Чистые белые квадратики приборов */
 .product_card {
-  background: #ffffff; /* Белоснежный фон карточки */
-  border: 1px solid #cfd8dc; /* Аккуратная светло-серая граница */
+  background: #ffffff; 
+  border: 1px solid #cfd8dc; 
   border-radius: 8px;
   padding: 24px;
   display: flex;
   flex-direction: column; 
   justify-content: space-between; 
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Легкая тень */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); 
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-/* Эффект наведения на белый квадратик */
 .product_card:hover {
   transform: translateY(-4px); 
-  border-color: #0099ff; /* Подсветка края голубым при наведении */
-  box-shadow: 0 10px 20px rgba(13, 35, 58, 0.1); /* Мягкая синеватая тень */
+  border-color: #0099ff; 
+  box-shadow: 0 10px 20px rgba(13, 35, 58, 0.1); 
 }
 
 .card_badge_row {
   display: flex;
 }
 
-/* Бейдж взрывозащиты в оригинальном стиле */
 .ex_badge {
-  background: #e6f4ff; /* Мягкий голубой фон */
-  color: #0077cc; /* Насыщенный синий текст */
+  background: #e6f4ff; 
+  color: #0077cc; 
   padding: 4px 10px;
   font-size: 11px;
   font-weight: 700;
@@ -180,84 +171,82 @@
   text-transform: uppercase;
 }
 
-/* Контейнер, который держит форму и пропорции для фото */
+
 .card_image_container {
-  background: #ffffff; /* Белый фон для подложки прибора */
+  background: #ffffff; 
   height: 180px;
   margin: 16px 0;
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden; /* Прячет всё, что вылезает за края */
-  border: 1px solid #e2e8f0; /* Легкая аккуратная рамочка вокруг фото */
+  overflow: hidden; 
+  border: 1px solid #e2e8f0; 
 }
 
-/* Сама картинка прибора */
+
 .product_img {
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain; /* Картинка полностью помещается внутрь, сохраняя пропорции */
+  object-fit: contain; 
   transition: transform 0.3s ease;
 }
 
-/* Эффект: при наведении на весь квадратик, картинка внутри плавно увеличивается */
+
 .product_card:hover .product_img {
   transform: scale(1.05);
 }
 
 .card_title {
   font-size: 18px;
-  color: #0d233a; /* Синий заголовок прибора */
+  color: #0d233a; 
   margin: 0 0 10px 0;
   font-weight: 600;
 }
 
 .card_desc {
-  color: #4a5568; /* Серый текст описания, приятный для глаз */
+  color: #4a5568; 
   font-size: 14px;
   line-height: 1.5;
   margin: 0 0 20px 0;
 }
 
-/* Обертка для контента, чтобы кнопка всегда прижималась строго к низу */
+
 .card_top_info {
   display: flex;
   flex-direction: column;
 }
 
-/* Новая стильная кнопка во всю ширину */
+
 .btn_more_full {
   width: 100%;
-  background: #f0f4f8; /* Светлый нейтральный фон кнопки */
-  border: 1px solid #0099ff; /* Голубой контур */
-  color: #0099ff; /* Голубой текст */
+  background: #f0f4f8; 
+  border: 1px solid #0099ff; 
+  color: #0099ff; 
   padding: 12px 20px;
   border-radius: 6px;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
   display: flex;
-  justify-content: space-between; /* Текст слева, стрелка справа */
+  justify-content: space-between; 
   align-items: center;
   transition: all 0.2s ease-in-out;
   margin-top: 15px;
 }
 
-/* Эффект при наведении на кнопку */
 .btn_more_full:hover {
-  background: #0099ff; /* Кнопка полностью заливается фирменным голубым */
-  color: #ffffff; /* Текст становится белым */
-  box-shadow: 0 4px 12px rgba(0, 153, 255, 0.2); /* Появляется мягкое свечение */
+  background: #0099ff; 
+  color: #ffffff; 
+  box-shadow: 0 4px 12px rgba(0, 153, 255, 0.2);
 }
 
-/* Анимация стрелочки внутри кнопки */
+
 .btn_arrow {
   font-size: 16px;
   transition: transform 0.2s ease-in-out;
 }
 
-/* При наведении на кнопку стрелочка красиво сдвигается вправо */
 .btn_more_full:hover .btn_arrow {
   transform: translateX(4px);
 }
@@ -267,8 +256,8 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(13, 35, 58, 0.6); /* Фирменный синий оттенок с прозрачностью */
-  backdrop-filter: blur(4px); /* Эффект размытия заднего плана */
+  background: rgba(13, 35, 58, 0.6); 
+  backdrop-filter: blur(4px); 
   display: flex;
   align-items: center;
   justify-content: center;
@@ -276,7 +265,7 @@
   animation: fadeIn 0.2s ease-out;
 }
 
-/* Белое окно с контентом */
+
 .modal_content {
   background: #ffffff;
   width: 90%;
@@ -328,10 +317,10 @@
 
 .modal_body {
   padding: 30px;
-  overflow-y: auto; /* Если текст большой, внутри окна появится прокрутка */
+  overflow-y: auto; 
 }
 
-/* Сетка внутри вкладки: картинка слева, текст справа */
+
 .modal_grid {
   display: grid;
   grid-template-columns: 1fr 1.5fr;
@@ -340,7 +329,7 @@
 
 @media (max-width: 640px) {
   .modal_grid {
-    grid-template-columns: 1fr; /* На мобилках картинка встанет над текстом */
+    grid-template-columns: 1fr; 
   }
 }
 
@@ -394,7 +383,6 @@
   margin-bottom: 8px;
 }
 
-/* Анимации появления */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -404,9 +392,7 @@
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
-/* ======================================= */
-/* СТИЛИ ДЛЯ ИНЖЕНЕРНЫХ ТАБЛИЦ В ОКНЕ      */
-/* ======================================= */
+
 
 .modal_table_zone {
   margin-top: 30px;
@@ -421,22 +407,21 @@
   font-weight: 600;
 }
 
-/* Сама таблица */
 .tech_table {
   width: 100%;
-  border-collapse: collapse; /* Убирает двойные рамки между ячейками */
+  border-collapse: collapse;
   font-size: 14px;
   text-align: left;
   background: #ffffff;
   border-radius: 6px;
-  overflow: hidden; /* Закругляет края таблицы */
+  overflow: hidden; 
   border: 1px solid #e2e8f0;
 }
 
 /* Шапка таблицы */
 .tech_table th {
-  background-color: #0d233a; /* Тёмно-синий фон шапки под стиль сайта */
-  color: #ffffff; /* Белый текст */
+  background-color: #0d233a; 
+  color: #ffffff; 
   padding: 12px 16px;
   font-weight: 600;
   font-size: 13px;
@@ -444,7 +429,6 @@
   letter-spacing: 0.5px;
 }
 
-/* Все ячейки */
 .tech_table td {
   padding: 12px 16px;
   border-bottom: 1px solid #edf2f7;
@@ -452,24 +436,22 @@
   line-height: 1.5;
 }
 
-/* Эффект зебры (каждая чётная строка чуть темнее) */
 .tech_table tbody tr:nth-child(even) {
   background-color: #f8fafc;
 }
 
-/* Эффект подсветки строки при наведении мыши */
 .tech_table tbody tr:hover {
   background-color: #edf2f7;
   transition: background-color 0.15s ease-in-out;
 }
 
-/* Левая колонка (Параметры) */
+
 .td_param {
-  font-weight: 500; /* Чуть плотнее, чтобы названия выделялись */
-  width: 45%; /* Распределяем ширину колонок */
+  font-weight: 500; 
+  width: 45%; 
 }
 
-/* Правая колонка (Значения) */
+
 .td_value {
   color: #4a5568;
 }
@@ -480,14 +462,14 @@
   font-style: italic;
 }
 
-/* Контейнер для кнопок в шапке модального окна */
+
 .modal_header_actions {
   display: flex;
   gap: 10px;
   align-items: center;
 }
 
-/* Стили кнопки генерации ссылки */
+
 .btn_share {
   background-color: #f0f4f8;
   border: 1px solid #008be2;
@@ -505,9 +487,9 @@
   color: #ffffff;
 }
 
-/* Стиль при успешном копировании */
+
 .btn_share_success {
-  background-color: #10b981 !important; /* Зеленый цвет успеха */
+  background-color: #10b981 !important; 
   border-color: #10b981 !important;
   color: #ffffff !important;
 }

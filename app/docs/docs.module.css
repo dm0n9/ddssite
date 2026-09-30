@@ -1,8 +1,7 @@
 
-/* app/docs/docs.module.css */
 
 .main_layout {
-  background-color: #f4f7f6; /* Светлый серо-голубой фон всей страницы */
+  background-color: #f4f7f6; 
   color: #1a202c;
   font-family: system-ui, -apple-system, sans-serif;
   min-height: 100vh;
@@ -14,9 +13,6 @@
   padding: 0 20px;
 }
 
-/* ======================================= */
-/* ФИРМЕННАЯ СИНЯЯ ШАПКА ДДС (КОПИЯ С МИНЕВАЧ) */
-/* ======================================= */
 .header {
   background-color: #008be2;
   box-shadow: 0 4px 12px rgba(0, 139, 226, 0.15);
@@ -122,9 +118,7 @@
   font-weight: 700;
 }
 
-/* ======================================= */
-/* СТИЛИ ДЛЯ РАЗДЕЛОВ И СПИСКОВ ДОКУМЕНТОВ */
-/* ======================================= */
+
 .docs_tabs {
   display: flex;
   gap: 10px;
