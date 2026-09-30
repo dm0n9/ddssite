@@ -28,7 +28,7 @@ export async function GET() {
       },
       {
         category: "manual",
-        file: "Description_Means_Measurement.pdf",
+        file: "ACKY_OT_2025.pdf",
         size: "1.2 Мб",
         order: 3,
         title: {
@@ -39,7 +39,7 @@ export async function GET() {
       },
       {
         category: "manual",
-        file: "Verification_Methodology.pdf",
+        file: "ACKY_Mn.pdf",
         size: "1.4 Мб",
         order: 4,
         title: {
