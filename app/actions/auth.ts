@@ -21,7 +21,7 @@ export async function loginAdmin(formData: FormData) {
   const cookieStore = await cookies();
   cookieStore.set("admin_session", "authenticated", {
     httpOnly: true,
-    secure: false, // Обязательно false для работы без HTTPS
+    secure: false, 
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 7,
     path: "/",

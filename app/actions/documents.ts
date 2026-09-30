@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import fs from "fs/promises";
 import path from "path";
 
-// Форматирование размера файла
+
 function formatFileSize(bytes: number): string {
   if (bytes >= 1024 * 1024) {
     return `${(bytes / (1024 * 1024)).toFixed(1)} Мб`;
@@ -13,7 +13,7 @@ function formatFileSize(bytes: number): string {
   return `${Math.round(bytes / 1024)} Кб`;
 }
 
-// Автоматическая непрерывная перенумерация документов 1, 2, 3...
+
 async function reindexVisibleDocs() {
   const visibleDocs = await prisma.document.findMany({
     where: { isHidden: false },
@@ -35,7 +35,7 @@ async function reindexVisibleDocs() {
   }
 }
 
-// Переключение видимости документа
+
 export async function toggleDocVisibility(id: string, isHidden: boolean) {
   try {
     await prisma.document.update({
@@ -57,7 +57,7 @@ export async function toggleDocVisibility(id: string, isHidden: boolean) {
   }
 }
 
-// Ручное изменение порядка документа
+
 export async function updateDocOrder(id: string, targetOrder: number) {
   try {
     const visibleDocs = await prisma.document.findMany({
@@ -93,7 +93,7 @@ export async function updateDocOrder(id: string, targetOrder: number) {
   }
 }
 
-// Добавление документа или внешней ссылки
+
 export async function addDocument(formData: FormData) {
   try {
     const externalUrl = formData.get("externalUrl")?.toString().trim();
@@ -102,7 +102,7 @@ export async function addDocument(formData: FormData) {
     let fileName = "";
     let sizeFormatted = "";
 
-    // Проверяем: это внешняя ссылка или локальный PDF
+   
     if (externalUrl && /^https?:\/\//i.test(externalUrl)) {
       fileName = externalUrl;
       sizeFormatted = "Внешний ресурс";
@@ -151,7 +151,7 @@ export async function addDocument(formData: FormData) {
   }
 }
 
-// Обновление документа или ссылки
+
 export async function updateDocument(formData: FormData) {
   try {
     const id = formData.get("id")?.toString();

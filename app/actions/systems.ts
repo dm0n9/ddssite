@@ -6,7 +6,7 @@ import fs from "fs/promises";
 import path from "path";
 import { cookies } from "next/headers";
 
-// Вспомогательная функция: гарантирует строгий порядок 1, 2, 3... без пропусков среди видимых
+
 async function reindexVisibleSystems() {
   const visibleSystems = await prisma.system.findMany({
     where: { isHidden: false },
@@ -28,9 +28,7 @@ async function reindexVisibleSystems() {
   }
 }
 
-// ============================================================================
-// 1. ДОБАВЛЕНИЕ НОВОЙ СИСТЕМЫ
-// ============================================================================
+
 export async function addSystem(formData: FormData) {
   try {
     const cookieStore = await cookies();
@@ -56,7 +54,7 @@ export async function addSystem(formData: FormData) {
     const specCount = parseInt(formData.get("specCount")?.toString() || "3", 10);
     const extraImgCount = parseInt(formData.get("extraImgCount")?.toString() || "0", 10);
 
-    // --- ОБРАБОТКА ГЛАВНОГО ФОТО ---
+    
     const imageFile = formData.get("image") as File | null;
     let imageFileName = "placeholder.jpg"; 
 
@@ -71,7 +69,7 @@ export async function addSystem(formData: FormData) {
       await fs.writeFile(path.join(uploadDir, imageFileName), buffer);
     }
 
-    // --- ОБРАБОТКА ДОПОЛНИТЕЛЬНЫХ ФОТО (СХЕМ) ---
+   
     const extraImagesPaths: string[] = [];
     const schemesDir = path.join(process.cwd(), "public", "systems", "scheme");
     await fs.mkdir(schemesDir, { recursive: true }).catch(() => {});
@@ -89,7 +87,7 @@ export async function addSystem(formData: FormData) {
       }
     }
 
-    // --- ОБРАБОТКА СПИСКОВ И ТАБЛИЦ ---
+   
     const getApps = (lang: string) => {
       const apps = [];
       for (let i = 1; i <= appCount; i++) {
@@ -120,7 +118,7 @@ export async function addSystem(formData: FormData) {
 
     const visibleCount = await prisma.system.count({ where: { isHidden: false } });
 
-    // --- СОХРАНЕНИЕ В БАЗУ ДАННЫХ ---
+    
     await prisma.system.create({
       data: {
         slug: cleanName,
@@ -152,9 +150,7 @@ export async function addSystem(formData: FormData) {
   }
 }
 
-// ============================================================================
-// 2. ОБНОВЛЕНИЕ СУЩЕСТВУЮЩЕЙ СИСТЕМЫ
-// ============================================================================
+
 export async function updateSystem(formData: FormData) {
   try {
     const cookieStore = await cookies();
@@ -164,7 +160,7 @@ export async function updateSystem(formData: FormData) {
       return; 
     }
 
-    // Поддерживаем ключи systemId, productId и id
+    
     const systemId = formData.get("systemId")?.toString() || formData.get("productId")?.toString() || formData.get("id")?.toString();
     if (!systemId) {
       console.error("🚨 Ошибка: ID системы не передан для обновления!");
@@ -196,7 +192,7 @@ export async function updateSystem(formData: FormData) {
     const specCount = parseInt(formData.get("specCount")?.toString() || "3", 10);
     const extraImgCount = parseInt(formData.get("extraImgCount")?.toString() || "0", 10);
 
-    // --- ОБРАБОТКА ГЛАВНОГО ФОТО ---
+  
     const imageFile = formData.get("image") as File | null;
     let imageFileName = existingSystem.image;
 
@@ -211,7 +207,7 @@ export async function updateSystem(formData: FormData) {
       await fs.writeFile(path.join(uploadDir, imageFileName), buffer);
     }
 
-    // --- ОБРАБОТКА ДОПОЛНИТЕЛЬНЫХ ФОТО (СХЕМ) ---
+    
     const extraImagesPaths: string[] = [];
     const schemesDir = path.join(process.cwd(), "public", "systems", "scheme");
     await fs.mkdir(schemesDir, { recursive: true }).catch(() => {});
@@ -234,7 +230,7 @@ export async function updateSystem(formData: FormData) {
       }
     }
 
-    // --- ОБРАБОТКА ДИНАМИЧЕСКИХ СПИСКОВ И ТАБЛИЦ ---
+    
     const getApps = (lang: string) => {
       const apps = [];
       for (let i = 1; i <= appCount; i++) {
@@ -263,7 +259,7 @@ export async function updateSystem(formData: FormData) {
       value: { ru: row.value, en: tEn[index]?.value || row.value, cn: tCn[index]?.value || row.value }
     }));
 
-    // --- ОБНОВЛЕНИЕ ДАННЫХ В БАЗЕ ---
+    
     await prisma.system.update({
       where: { id: systemId },
       data: {
@@ -292,9 +288,7 @@ export async function updateSystem(formData: FormData) {
   }
 }
 
-// ============================================================================
-// 3. ПЕРЕКЛЮЧАТЕЛЬ ВИДИМОСТИ (СКРЫТЬ / ПОКАЗАТЬ) БЕЗ ПРОПУСКОВ
-// ============================================================================
+
 export async function toggleSystemVisibility(id: string, isHidden: boolean) {
   try {
     const cookieStore = await cookies();
@@ -309,11 +303,10 @@ export async function toggleSystemVisibility(id: string, isHidden: boolean) {
       where: { id: String(id) },
       data: { 
         isHidden,
-        order: isHidden ? 0 : 9999 // При скрытии ставим 0, при открытии — в конец
+        order: isHidden ? 0 : 9999 
       }
     });
 
-    // Автоматически пересчитываем порядок всех видимых карточек (1, 2, 3...)
     await reindexVisibleSystems();
 
     revalidatePath("/system");
@@ -326,9 +319,7 @@ export async function toggleSystemVisibility(id: string, isHidden: boolean) {
   }
 }
 
-// ============================================================================
-// 4. ИЗМЕНЕНИЕ ПОРЯДКА СИСТЕМЫ БЕЗ ДУБЛЕЙ И ПРОПУСКОВ
-// ============================================================================
+
 export async function updateSingleSystemOrder(id: string, requestedOrder: number) {
   try {
     const cookieStore = await cookies();
@@ -338,7 +329,7 @@ export async function updateSingleSystemOrder(id: string, requestedOrder: number
       return; 
     }
 
-    // 1. Получаем ТОЛЬКО ВИДИМЫЕ системы
+    
     const visibleSystems = await prisma.system.findMany({
       where: { isHidden: false },
       orderBy: [
@@ -350,14 +341,14 @@ export async function updateSingleSystemOrder(id: string, requestedOrder: number
     const targetSystem = visibleSystems.find(p => p.id === id);
     if (!targetSystem) return;
 
-    // 2. Убираем перемещаемую систему
+    
     const filtered = visibleSystems.filter(p => p.id !== id);
 
-    // 3. Вычисляем корректный индекс вставки
+    
     const targetIndex = Math.max(0, Math.min(requestedOrder - 1, filtered.length));
     filtered.splice(targetIndex, 0, targetSystem);
 
-    // 4. Перезаписываем порядок строго по очереди 1, 2, 3...
+  
     const updates = filtered.map((p, index) => 
       prisma.system.update({
         where: { id: p.id },

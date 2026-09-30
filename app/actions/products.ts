@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import fs from "fs/promises";
 import path from "path";
 
-// Вспомогательная функция: гарантирует строгий порядок 1, 2, 3... без пропусков
+
 async function reindexVisibleProducts() {
   const visibleProducts = await prisma.product.findMany({
     where: { isHidden: false },
@@ -34,7 +34,7 @@ export async function toggleProductVisibility(id: string, isHidden: boolean) {
       where: { id },
       data: {
         isHidden,
-        order: isHidden ? 0 : 9999, // Скрытым даем 0, восстанавливаемым — в конец
+        order: isHidden ? 0 : 9999, 
       },
     });
 
@@ -49,7 +49,7 @@ export async function toggleProductVisibility(id: string, isHidden: boolean) {
   }
 }
 
-// Ручное изменение порядка без дублирования и сдвигов
+
 export async function updateSingleProductOrder(id: string, targetOrder: number) {
   try {
     const visibleProducts = await prisma.product.findMany({
@@ -63,14 +63,14 @@ export async function updateSingleProductOrder(id: string, targetOrder: number) 
     const targetProduct = visibleProducts.find((p) => p.id === id);
     if (!targetProduct) return { success: false };
 
-    // Убираем перемещаемый товар из списка
+   
     const filtered = visibleProducts.filter((p) => p.id !== id);
 
-    // Вычисляем корректную позицию вставки
+   
     const newIndex = Math.max(0, Math.min(targetOrder - 1, filtered.length));
     filtered.splice(newIndex, 0, targetProduct);
 
-    // Присваиваем непрерывные номера 1, 2, 3...
+   
     const reorderQueries = filtered.map((prod, index) =>
       prisma.product.update({
         where: { id: prod.id },
@@ -89,7 +89,7 @@ export async function updateSingleProductOrder(id: string, targetOrder: number) 
   }
 }
 
-// Создание нового товара
+
 export async function addProduct(formData: FormData) {
   try {
     const customFileName = formData.get("customFileName")?.toString().trim() || `product-${Date.now()}`;
@@ -189,7 +189,7 @@ export async function addProduct(formData: FormData) {
   }
 }
 
-// Редактирование товара
+
 export async function updateProduct(formData: FormData) {
   try {
     const id = formData.get("productId")?.toString();

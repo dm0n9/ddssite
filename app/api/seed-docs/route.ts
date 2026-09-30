@@ -3,7 +3,7 @@ import { prisma } from "@/app/lib/db";
 
 export async function GET() {
   try {
-    const docs = [
+    const docsTexts = [
       {
         category: "catalog",
         file: "Presentation_Davis_Derby.pdf",
@@ -64,7 +64,7 @@ export async function GET() {
     await prisma.document.deleteMany({});
 
     await prisma.document.createMany({
-      data: docs
+      data: docsTexts
     });
 
     return NextResponse.json({ 

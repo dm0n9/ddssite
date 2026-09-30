@@ -19,7 +19,7 @@ export default function AdminLoginPage() {
         setError(result.error);
         setIsLoading(false);
       } else if (result?.success) {
-        // Полная перезагрузка гарантирует, что сервер сразу увидит куку и отобразит панель админа
+    
         window.location.href = "/products";
       }
     } catch (err) {
